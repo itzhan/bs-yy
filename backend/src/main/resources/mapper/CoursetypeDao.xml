@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.CoursetypeDao">
+
+    <resultMap type="com.entity.CoursetypeEntity" id="coursetypeMap">
+        <result property="id" column="id"/>
+        <result property="coursetypename" column="coursetypename"/>
+        <result property="addtime" column="addtime"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.CoursetypeVO" >
+        SELECT * FROM coursetype coursetype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.CoursetypeVO" >
+        SELECT coursetype.* FROM coursetype coursetype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.CoursetypeView" >
+        SELECT coursetype.* FROM coursetype coursetype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.CoursetypeView" >
+        SELECT * FROM coursetype coursetype ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

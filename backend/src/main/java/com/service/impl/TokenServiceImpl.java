@@ -1,0 +1,73 @@
+
+package com.service.impl;
+
+
+import cn.hutool.core.util.IdUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.dao.TokenDao;
+import com.entity.TokenEntity;
+import com.service.TokenService;
+import com.utils.PageUtils;
+import com.utils.Query;
+import org.springframework.stereotype.Service;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+
+/**
+ * token
+ */
+@Service("tokenService")
+public class TokenServiceImpl extends ServiceImpl<TokenDao, TokenEntity> implements TokenService {
+
+    @Override
+    public PageUtils queryPage(Map<String, Object> params) {
+        Page<TokenEntity> page = this.page(new Query<TokenEntity>(params).getPage(), new LambdaQueryWrapper<>());
+        return new PageUtils(page);
+    }
+
+    @Override
+    public List<TokenEntity> selectListView(Wrapper<TokenEntity> wrapper) {
+        return this.list(wrapper);
+    }
+
+    @Override
+    public PageUtils queryPage(Map<String, Object> params, Wrapper<TokenEntity> wrapper) {
+        Page<TokenEntity> page = new Query<TokenEntity>(params).getPage();
+        page.setRecords(list(page, wrapper));
+        return new PageUtils(page);
+    }
+
+    @Override
+    public String generateToken(Long userid, String username, String tableName, String role) {
+        TokenEntity tokenEntity = this.getOne(new QueryWrapper<TokenEntity>().eq("userid", userid).eq("role", role));
+        String token = IdUtil.getSnowflakeNextIdStr();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.HOUR_OF_DAY, 1);
+        if (tokenEntity != null) {
+            tokenEntity.setToken(token);
+            tokenEntity.setExpiratedtime(cal.getTime());
+            this.updateById(tokenEntity);
+        } else {
+            this.save(new TokenEntity(userid, username, tableName, role, token, cal.getTime()));
+        }
+        return token;
+    }
+
+    @Override
+    public TokenEntity getTokenEntity(String token) {
+        TokenEntity tokenEntity = this.getOne(new QueryWrapper<TokenEntity>().eq("token", token));
+        if (tokenEntity == null || tokenEntity.getExpiratedtime().getTime() < new Date().getTime()) {
+            return null;
+        }
+        return tokenEntity;
+    }
+}

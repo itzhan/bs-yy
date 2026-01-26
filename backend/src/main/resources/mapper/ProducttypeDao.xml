@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.ProducttypeDao">
+
+    <resultMap type="com.entity.ProducttypeEntity" id="producttypeMap">
+        <result property="id" column="id"/>
+        <result property="producttypename" column="producttypename"/>
+        <result property="addtime" column="addtime"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.ProducttypeVO" >
+        SELECT * FROM producttype producttype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.ProducttypeVO" >
+        SELECT producttype.* FROM producttype producttype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.ProducttypeView" >
+        SELECT producttype.* FROM producttype producttype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.ProducttypeView" >
+        SELECT * FROM producttype producttype ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

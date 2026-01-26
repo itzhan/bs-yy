@@ -1,0 +1,50 @@
+{
+  "name": "minsu-admin-vue3",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 3001",
+    "build": "vite build --mode production",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.5",
+    "pinia": "^2.1.7",
+    "axios": "^1.6.2",
+    "element-plus": "^2.4.4",
+    "@element-plus/icons-vue": "^2.3.1",
+    "echarts": "^5.4.3",
+    "vue-echarts": "^6.6.1",
+    "js-md5": "^0.8.3",
+    "nprogress": "^0.2.0",
+    "js-cookie": "^3.0.5",
+    "@vueuse/core": "^10.6.1",
+    "dayjs": "^1.11.10",
+    "quill": "^2.0.3",
+    "@vueup/vue-quill": "^1.2.0",
+    "vue-json-excel3": "^1.0.30"
+  },
+  "devDependencies": {
+    "sass-embedded": "^1.93.3",
+    "@types/node": "^20.10.5",
+    "@types/nprogress": "^0.2.3",
+    "@types/js-cookie": "^3.0.6",
+    "@types/js-md5": "^0.7.2",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "@vue/eslint-config-typescript": "^12.0.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8",
+    "vue-tsc": "^2.0.0",
+    "tailwindcss": "^3.3.6",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "eslint": "^8.54.0",
+    "eslint-plugin-vue": "^9.19.2",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1"
+  },
+  "packageManager": "pnpm@10.22.0+sha512.bf049efe995b28f527fd2b41ae0474ce29186f7edcb3bf545087bd61fbbebb2bf75362d1307fda09c2d288e1e499787ac12d4fcb617a974718a6051f2eee741c"
+}

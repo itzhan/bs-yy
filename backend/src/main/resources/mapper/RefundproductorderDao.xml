@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.RefundproductorderDao">
+
+    <resultMap type="com.entity.RefundproductorderEntity" id="refundproductorderMap">
+        <result property="id" column="id"/>
+        <result property="productname" column="productname"/>
+        <result property="productimage" column="productimage"/>
+        <result property="producttype" column="producttype"/>
+        <result property="productprice" column="productprice"/>
+        <result property="quantity" column="quantity"/>
+        <result property="totalprice" column="totalprice"/>
+        <result property="userid" column="userid"/>
+        <result property="refundreason" column="refundreason"/>
+        <result property="addtime" column="addtime"/>
+        <result property="crossuserid" column="crossuserid"/>
+        <result property="crossrefid" column="crossrefid"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.RefundproductorderVO" >
+        SELECT * FROM refundproductorder refundproductorder ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.RefundproductorderVO" >
+        SELECT refundproductorder.* FROM refundproductorder refundproductorder ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.RefundproductorderView" >
+        SELECT refundproductorder.* FROM refundproductorder refundproductorder ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.RefundproductorderView" >
+        SELECT * FROM refundproductorder refundproductorder ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

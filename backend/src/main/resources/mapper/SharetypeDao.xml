@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.SharetypeDao">
+
+    <resultMap type="com.entity.SharetypeEntity" id="sharetypeMap">
+        <result property="id" column="id"/>
+        <result property="sharetypename" column="sharetypename"/>
+        <result property="addtime" column="addtime"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.SharetypeVO" >
+        SELECT * FROM sharetype sharetype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.SharetypeVO" >
+        SELECT sharetype.* FROM sharetype sharetype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.SharetypeView" >
+        SELECT sharetype.* FROM sharetype sharetype ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.SharetypeView" >
+        SELECT * FROM sharetype sharetype ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

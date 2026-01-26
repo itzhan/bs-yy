@@ -1,0 +1,61 @@
+server:
+  port: 8888
+  tomcat:
+    uri-encoding: UTF-8
+  servlet:
+    context-path: /gym_vclqwy4
+spring:
+  application:
+    name: gym_vclqwy4
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+  datasource:
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 200
+      idle-timeout: 10000
+      auto-commit: true
+      connection-test-query: SELECT 1
+    url: jdbc:mysql://localhost:3306/gym_vclqwy4?rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&allowMultiQueries=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: ab123168
+    type: com.zaxxer.hikari.HikariDataSource
+  freemarker:
+    enabled: false
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: false
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: assign_id
+      table-underline: false
+      logic-delete-value: 0
+      logic-not-delete-value: 1
+upload:
+  path: ../upload/
+
+# AI配置（OpenAI兼容）,在 https://openrouter.ai/models?q=free 找一个免费模型就可以用
+ai:
+  enabled: ${AI_ENABLED:true}
+  base-url: ${AI_BASE_URL:https://openrouter.ai/api/v1}
+  api-key: ${AI_API_KEY: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}
+  model: ${AI_MODEL:z-ai/glm-4.5-air:free}
+
+# 注意：图像数据，要求大小不超过8M，最短边至少15px，最长边最大8192px,支持jpg/png/bmp格式
+baidu:
+  image:
+    enabled: ${BAIDU_IMAGE_ENABLED:true}
+    api-key: ${BAIDU_IMAGE_API_KEY:PDm8u3WFhlib7wuGqzZK98de}
+    secret-key: ${BAIDU_IMAGE_SECRET_KEY:9Q3q9rZhpSZdhtAkwf1K7dTnRDdNvSs1}
+    endpoint: https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general
+    baike-num: 0
+    connect-timeout: 6000
+    read-timeout: 8000

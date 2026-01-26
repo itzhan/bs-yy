@@ -1,0 +1,165 @@
+package com.entity.vo;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Date;
+import java.math.BigDecimal;
+
+/**
+ * 取消商品订单
+ * @author ds
+ * @email 1312461553@qq.com
+ */
+public class CancelproductorderVO  implements Serializable {
+    @Serial
+	private static final long serialVersionUID = 1L;
+
+    /*
+     * 订单编号
+     */
+    private Long id;
+    /*
+     * 商品名称
+     */
+    private String productname;
+    /*
+     * 商品图片
+     */
+    private String productimage;
+    /*
+     * 商品分类
+     */
+    private String producttype;
+    /*
+     * 商品单价
+     */
+    private Double productprice;
+    /*
+     * 购买数量
+     */
+    private Integer quantity;
+    /*
+     * 订单总价
+     */
+    private Double totalprice;
+    /*
+     * 用户ID
+     */
+    private Long userid;
+    /*
+     * 取消原因
+     */
+    private String cancelreason;
+    /*
+     * 创建时间
+     */
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat 
+    private Date addtime;
+    /*
+     * 跨表用户id
+     */
+    private Long crossuserid;
+    /*
+     * 跨表来源id
+     */
+    private Long crossrefid;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getProductname() {
+        return productname;
+    }
+
+    public void setProductname(String productname) {
+        this.productname = productname;
+    }
+
+    public String getProductimage() {
+        return productimage;
+    }
+
+    public void setProductimage(String productimage) {
+        this.productimage = productimage;
+    }
+
+    public String getProducttype() {
+        return producttype;
+    }
+
+    public void setProducttype(String producttype) {
+        this.producttype = producttype;
+    }
+
+    public Double getProductprice() {
+        return productprice;
+    }
+
+    public void setProductprice(Double productprice) {
+        this.productprice = productprice;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public Double getTotalprice() {
+        return totalprice;
+    }
+
+    public void setTotalprice(Double totalprice) {
+        this.totalprice = totalprice;
+    }
+
+    public Long getUserid() {
+        return userid;
+    }
+
+    public void setUserid(Long userid) {
+        this.userid = userid;
+    }
+
+    public String getCancelreason() {
+        return cancelreason;
+    }
+
+    public void setCancelreason(String cancelreason) {
+        this.cancelreason = cancelreason;
+    }
+
+    public Date getAddtime() {
+        return addtime;
+    }
+
+    public void setAddtime(Date addtime) {
+        this.addtime = addtime;
+    }
+
+    public Long getCrossuserid() {
+        return crossuserid;
+    }
+
+    public void setCrossuserid(Long crossuserid) {
+        this.crossuserid = crossuserid;
+    }
+
+    public Long getCrossrefid() {
+        return crossrefid;
+    }
+
+    public void setCrossrefid(Long crossrefid) {
+        this.crossrefid = crossrefid;
+    }
+}

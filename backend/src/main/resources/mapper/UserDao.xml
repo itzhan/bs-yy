@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.UserDao">
+
+    <resultMap type="com.entity.UserEntity" id="userMap">
+        <result property="id" column="id"/>
+        <result property="useraccount" column="useraccount"/>
+        <result property="userpassword" column="userpassword"/>
+        <result property="name" column="name"/>
+        <result property="sex" column="sex"/>
+        <result property="age" column="age"/>
+        <result property="phone" column="phone"/>
+        <result property="image" column="image"/>
+        <result property="money" column="money"/>
+        <result property="addtime" column="addtime"/>
+        <result property="cardno" column="cardno"/>
+        <result property="memberlevel" column="memberlevel"/>
+        <result property="expiretime" column="expiretime"/>
+        <result property="remainingcourses" column="remainingcourses"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.UserVO" >
+        SELECT * FROM user user ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.UserVO" >
+        SELECT user.* FROM user user ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.UserView" >
+        SELECT user.* FROM user user ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.UserView" >
+        SELECT * FROM user user ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

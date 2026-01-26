@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.CancelcourseenrollmentDao">
+
+    <resultMap type="com.entity.CancelcourseenrollmentEntity" id="cancelcourseenrollmentMap">
+        <result property="id" column="id"/>
+        <result property="coursename" column="coursename"/>
+        <result property="courseimage" column="courseimage"/>
+        <result property="coursetype" column="coursetype"/>
+        <result property="classtime" column="classtime"/>
+        <result property="duration" column="duration"/>
+        <result property="coachname" column="coachname"/>
+        <result property="userid" column="userid"/>
+        <result property="cancelreason" column="cancelreason"/>
+        <result property="addtime" column="addtime"/>
+        <result property="crossuserid" column="crossuserid"/>
+        <result property="crossrefid" column="crossrefid"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.CancelcourseenrollmentVO" >
+        SELECT * FROM cancelcourseenrollment cancelcourseenrollment ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.CancelcourseenrollmentVO" >
+        SELECT cancelcourseenrollment.* FROM cancelcourseenrollment cancelcourseenrollment ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.CancelcourseenrollmentView" >
+        SELECT cancelcourseenrollment.* FROM cancelcourseenrollment cancelcourseenrollment ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.CancelcourseenrollmentView" >
+        SELECT * FROM cancelcourseenrollment cancelcourseenrollment ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

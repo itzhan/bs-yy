@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.CourseDao">
+
+    <resultMap type="com.entity.CourseEntity" id="courseMap">
+        <result property="id" column="id"/>
+        <result property="coursename" column="coursename"/>
+        <result property="courseimage" column="courseimage"/>
+        <result property="coursetype" column="coursetype"/>
+        <result property="classtime" column="classtime"/>
+        <result property="duration" column="duration"/>
+        <result property="coachname" column="coachname"/>
+        <result property="coachaccount" column="coachaccount"/>
+        <result property="quota" column="quota"/>
+        <result property="coursedesc" column="coursedesc"/>
+        <result property="addtime" column="addtime"/>
+        <result property="favoritenum" column="favoritenum"/>
+        <result property="likenum" column="likenum"/>
+        <result property="stepnum" column="stepnum"/>
+        <result property="clicknum" column="clicknum"/>
+        <result property="clicktime" column="clicktime"/>
+        <result property="auditstatus" column="auditstatus"/>
+        <result property="auditreply" column="auditreply"/>
+        <result property="discussnum" column="discussnum"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.CourseVO" >
+        SELECT * FROM course course ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.CourseVO" >
+        SELECT course.* FROM course course ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.CourseView" >
+        SELECT course.* FROM course course ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.CourseView" >
+        SELECT * FROM course course ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

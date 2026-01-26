@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.CoachDao">
+
+    <resultMap type="com.entity.CoachEntity" id="coachMap">
+        <result property="id" column="id"/>
+        <result property="coachaccount" column="coachaccount"/>
+        <result property="coachpassword" column="coachpassword"/>
+        <result property="coachname" column="coachname"/>
+        <result property="coachimage" column="coachimage"/>
+        <result property="sex" column="sex"/>
+        <result property="phone" column="phone"/>
+        <result property="jobno" column="jobno"/>
+        <result property="specialty" column="specialty"/>
+        <result property="coachlevel" column="coachlevel"/>
+        <result property="workyears" column="workyears"/>
+        <result property="addtime" column="addtime"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.CoachVO" >
+        SELECT * FROM coach coach ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.CoachVO" >
+        SELECT coach.* FROM coach coach ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.CoachView" >
+        SELECT coach.* FROM coach coach ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.CoachView" >
+        SELECT * FROM coach coach ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

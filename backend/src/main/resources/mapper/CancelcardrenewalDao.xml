@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.CancelcardrenewalDao">
+
+    <resultMap type="com.entity.CancelcardrenewalEntity" id="cancelcardrenewalMap">
+        <result property="id" column="id"/>
+        <result property="packagename" column="packagename"/>
+        <result property="packagetype" column="packagetype"/>
+        <result property="packageprice" column="packageprice"/>
+        <result property="renewaldays" column="renewaldays"/>
+        <result property="userid" column="userid"/>
+        <result property="cancelreason" column="cancelreason"/>
+        <result property="addtime" column="addtime"/>
+        <result property="crossuserid" column="crossuserid"/>
+        <result property="crossrefid" column="crossrefid"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.CancelcardrenewalVO" >
+        SELECT * FROM cancelcardrenewal cancelcardrenewal ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.CancelcardrenewalVO" >
+        SELECT cancelcardrenewal.* FROM cancelcardrenewal cancelcardrenewal ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.CancelcardrenewalView" >
+        SELECT cancelcardrenewal.* FROM cancelcardrenewal cancelcardrenewal ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.CancelcardrenewalView" >
+        SELECT * FROM cancelcardrenewal cancelcardrenewal ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

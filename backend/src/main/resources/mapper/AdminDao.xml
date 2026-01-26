@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.AdminDao">
+
+    <resultMap type="com.entity.AdminEntity" id="adminMap">
+        <result property="id" column="id"/>
+        <result property="adminaccount" column="adminaccount"/>
+        <result property="adminpassword" column="adminpassword"/>
+        <result property="image" column="image"/>
+        <result property="role" column="role"/>
+        <result property="addtime" column="addtime"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.AdminVO" >
+        SELECT * FROM admin admin ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.AdminVO" >
+        SELECT admin.* FROM admin admin ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.AdminView" >
+        SELECT admin.* FROM admin admin ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.AdminView" >
+        SELECT * FROM admin admin ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

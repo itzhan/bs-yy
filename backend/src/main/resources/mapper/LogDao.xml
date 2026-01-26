@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.LogDao">
+
+    <resultMap type="com.entity.LogEntity" id="logMap">
+        <result property="id" column="id"/>
+        <result property="tablename" column="tablename"/>
+        <result property="module" column="module"/>
+        <result property="operatetype" column="operatetype"/>
+        <result property="businessid" column="businessid"/>
+        <result property="operatorid" column="operatorid"/>
+        <result property="operatorname" column="operatorname"/>
+        <result property="requesturl" column="requesturl"/>
+        <result property="requestmethod" column="requestmethod"/>
+        <result property="requestip" column="requestip"/>
+        <result property="detail" column="detail"/>
+        <result property="addtime" column="addtime"/>
+        <result property="userid" column="userid"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.LogVO" >
+        SELECT * FROM log log ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.LogVO" >
+        SELECT log.* FROM log log ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.LogView" >
+        SELECT log.* FROM log log ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.LogView" >
+        SELECT * FROM log log ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

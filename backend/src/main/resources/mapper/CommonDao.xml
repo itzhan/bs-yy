@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.CommonDao">
+	<select id="getOption" resultType="String" >
+		SELECT distinct ${column} FROM ${table} 
+			where ${column} is not null and ${column} !=''
+            <if test = "conditionColumn != null and conditionValue != null">
+            and ${conditionColumn}=#{conditionValue}
+            </if>
+			<if test = "level != null"> 
+			and level=#{level} 
+			</if>
+			<if test = "parent != null"> 
+			and parent=#{parent} 
+			</if>
+	</select>
+	
+	<select id="getFollowByOption" resultType="map" >
+		SELECT * FROM ${table} where ${column}=#{columnValue}
+	</select>
+	
+	<update id="audit">
+		UPDATE ${table} set auditstatus=#{auditstatus} where auditreply=#{auditreply}
+	</update>
+	
+	<select id="remindCount" resultType="int" >
+		SELECT count(1) FROM ${table} 
+			where 1=1 
+			<if test = "type == 1 ">
+				<if test = " remindstart != null ">
+				     and ${column} &gt;= #{remindstart}
+				</if>
+				<if test = " remindend != null ">
+				     and ${column} &lt;= #{remindend}
+				</if>
+			</if>
+			<if test = "type == 2 ">
+				<if test = " remindstart != null ">
+				     and ${column} &gt;= str_to_date(#{remindstart},'%Y-%m-%d')
+				</if>
+				<if test = " remindend != null ">
+				     and ${column} &lt;= str_to_date(#{remindend},'%Y-%m-%d')
+				</if>
+			</if>
+	</select>
+
+	<select id="getCount" resultType="java.lang.Long">
+		SELECT COUNT(${column}) FROM ${table}
+		<where>
+			<if test="conditionColumn != null and conditionValue != null">
+				<choose>
+					<!-- 今日数量统计：当 conditionValue=today 时，统计当天记录 -->
+					<when test="conditionValue == 'today'">
+						AND ${conditionColumn} &gt;= CURDATE()
+						AND ${conditionColumn} &lt; DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+					</when>
+					<otherwise>
+						AND ${conditionColumn} = #{conditionValue}
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectCal" resultType="map" >
+		SELECT sum(${column}) sum,max(${column}) max,min(${column}) min,avg(${column}) avg FROM ${table}
+	</select>
+	
+	<select id="selectGroup" resultType="map" >
+		SELECT ${column} , count(1) total FROM ${table} group by ${column}
+	</select>
+	
+	<select id="selectValue" resultType="map" >
+		SELECT ${xColumn}, sum(${yColumn}) total FROM ${table} group by ${xColumn}
+	</select>
+	<select id="selectTimeStatValue" resultType="map" >
+		<!-- 按时间统计：yColumn 为 id 或非数值列时使用 count，其余使用 sum -->
+		<if test = 'timeStatType == "时" or timeStatType == "hour"'>
+			SELECT 
+				DATE_FORMAT(${xColumn},'%Y-%m-%d %H') ${xColumn},
+				CASE 
+					WHEN LOWER('${yColumn}') = 'id' THEN COUNT(1)
+					WHEN (SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS 
+					      WHERE TABLE_SCHEMA = DATABASE() 
+					        AND TABLE_NAME='${table}' 
+					        AND COLUMN_NAME='${yColumn}') IN ('int','integer','tinyint','smallint','mediumint','bigint','float','double','decimal','numeric','real') 
+					THEN SUM(${yColumn})
+					ELSE COUNT(1)
+				END AS total 
+			FROM ${table} 
+			GROUP BY DATE_FORMAT(${xColumn},'%Y-%m-%d %H')
+		</if>
+		<if test = 'timeStatType == "日" or timeStatType == "day"'>
+			SELECT 
+				DATE_FORMAT(${xColumn},'%Y-%m-%d') ${xColumn},
+				CASE 
+					WHEN LOWER('${yColumn}') = 'id' THEN COUNT(1)
+					WHEN (SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS 
+					      WHERE TABLE_SCHEMA = DATABASE() 
+					        AND TABLE_NAME='${table}' 
+					        AND COLUMN_NAME='${yColumn}') IN ('int','integer','tinyint','smallint','mediumint','bigint','float','double','decimal','numeric','real') 
+					THEN SUM(${yColumn})
+					ELSE COUNT(1)
+				END AS total 
+			FROM ${table} 
+			GROUP BY DATE_FORMAT(${xColumn},'%Y-%m-%d')
+		</if>
+		<if test = 'timeStatType == "月" or timeStatType == "month"'>
+			SELECT 
+				DATE_FORMAT(${xColumn},'%Y-%m') ${xColumn},
+				CASE 
+					WHEN LOWER('${yColumn}') = 'id' THEN COUNT(1)
+					WHEN (SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS 
+					      WHERE TABLE_SCHEMA = DATABASE() 
+					        AND TABLE_NAME='${table}' 
+					        AND COLUMN_NAME='${yColumn}') IN ('int','integer','tinyint','smallint','mediumint','bigint','float','double','decimal','numeric','real') 
+					THEN SUM(${yColumn})
+					ELSE COUNT(1)
+				END AS total 
+			FROM ${table} 
+			GROUP BY DATE_FORMAT(${xColumn},'%Y-%m')
+		</if>
+		<if test = 'timeStatType == "年" or timeStatType == "year"'>
+			SELECT 
+				DATE_FORMAT(${xColumn},'%Y') ${xColumn},
+				CASE 
+					WHEN LOWER('${yColumn}') = 'id' THEN COUNT(1)
+					WHEN (SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS 
+					      WHERE TABLE_SCHEMA = DATABASE() 
+					        AND TABLE_NAME='${table}' 
+					        AND COLUMN_NAME='${yColumn}') IN ('int','integer','tinyint','smallint','mediumint','bigint','float','double','decimal','numeric','real') 
+					THEN SUM(${yColumn})
+					ELSE COUNT(1)
+				END AS total 
+			FROM ${table} 
+			GROUP BY DATE_FORMAT(${xColumn},'%Y')
+		</if>
+    </select>
+</mapper>
