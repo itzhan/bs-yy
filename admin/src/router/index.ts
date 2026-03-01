@@ -42,6 +42,36 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '教练管理' }
       },
       {
+        path: 'modules/coachmember',
+        name: 'Coachmember',
+        component: () => import('@/views/modules/coachmember/List.vue'),
+        meta: { title: '教练-会员绑定管理' }
+      },
+      {
+        path: 'modules/trainingplan',
+        name: 'Trainingplan',
+        component: () => import('@/views/modules/trainingplan/List.vue'),
+        meta: { title: '训练计划管理' }
+      },
+      {
+        path: 'modules/trainingplanitem',
+        name: 'Trainingplanitem',
+        component: () => import('@/views/modules/trainingplanitem/List.vue'),
+        meta: { title: '训练计划明细管理' }
+      },
+      {
+        path: 'modules/trainingrecord',
+        name: 'Trainingrecord',
+        component: () => import('@/views/modules/trainingrecord/List.vue'),
+        meta: { title: '训练记录管理' }
+      },
+      {
+        path: 'modules/coachreview',
+        name: 'Coachreview',
+        component: () => import('@/views/modules/coachreview/List.vue'),
+        meta: { title: '教练评价管理' }
+      },
+      {
         path: 'modules/coursetype',
         name: 'Coursetype',
         component: () => import('@/views/modules/coursetype/List.vue'),

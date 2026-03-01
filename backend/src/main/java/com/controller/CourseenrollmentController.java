@@ -1,6 +1,7 @@
  package com.controller;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.annotation.IgnoreAuth;
 
 import com.entity.CourseenrollmentEntity;
+import com.entity.CourseEntity;
 import com.entity.view.CourseenrollmentView;
 
 import com.service.CourseenrollmentService;
@@ -51,6 +53,13 @@ import java.io.IOException;
 import com.service.NotifyService;
 import com.entity.NotifyEntity;
 import com.log.OperationLogRecorder;
+import com.service.CoachmemberService;
+import com.entity.CoachmemberEntity;
+import com.service.CoachService;
+import com.service.CourseService;
+import com.service.UserService;
+import com.entity.CoachEntity;
+import com.entity.UserEntity;
 
 /**
 * 课程报名记录
@@ -67,7 +76,122 @@ public class CourseenrollmentController {
     @Resource
     private NotifyService notifyService;
     @Resource
+    private CoachmemberService coachmemberService;
+    @Resource
+    private CoachService coachService;
+    @Resource
+    private UserService userService;
+    @Resource
+    private CourseService courseService;
+    @Resource
     private OperationLogRecorder operationLogRecorder;
+
+    private void ensureCoachMemberBinding(CourseenrollmentEntity courseenrollment, HttpServletRequest request) {
+        if (courseenrollment == null) {
+            return;
+        }
+        Long userId = courseenrollment.getUserid();
+        if (userId == null) {
+            Object sessionUserId = request.getSession().getAttribute("userId");
+            if (sessionUserId instanceof Long) {
+                userId = (Long) sessionUserId;
+            }
+        }
+        if (userId == null) {
+            return;
+        }
+        String coachAccount = courseenrollment.getCoachaccount();
+        String coachName = courseenrollment.getCoachname();
+        CoachEntity coach = null;
+        if (!StrUtil.isBlank(coachAccount)) {
+            coach = coachService.getOne(new QueryWrapper<CoachEntity>().eq("coachaccount", coachAccount));
+        }
+        if (coach == null && !StrUtil.isBlank(coachName)) {
+            coach = coachService.getOne(new QueryWrapper<CoachEntity>().eq("coachname", coachName));
+        }
+        if (coach == null || coach.getId() == null) {
+            return;
+        }
+        CoachmemberEntity exists = coachmemberService.getOne(new QueryWrapper<CoachmemberEntity>()
+                .eq("coachid", coach.getId())
+                .eq("userid", userId));
+        if (exists != null) {
+            return;
+        }
+        UserEntity user = userService.getById(userId);
+        CoachmemberEntity coachmember = new CoachmemberEntity();
+        coachmember.setCoachid(coach.getId());
+        coachmember.setCoachaccount(coach.getCoachaccount());
+        coachmember.setCoachname(coach.getCoachname());
+        coachmember.setUserid(userId);
+        if (user != null) {
+            coachmember.setUseraccount(user.getUseraccount());
+            coachmember.setUsername(user.getName());
+            coachmember.setPhone(user.getPhone());
+            coachmember.setUserimage(user.getImage());
+        }
+        coachmember.setBindstatus("已绑定");
+        coachmemberService.save(coachmember);
+    }
+
+    private void fillEnrollmentLockedFields(CourseenrollmentEntity courseenrollment, HttpServletRequest request) {
+        if (courseenrollment == null) {
+            return;
+        }
+        Long userId = courseenrollment.getUserid();
+        if (userId == null) {
+            Object sessionUserId = request.getSession().getAttribute("userId");
+            if (sessionUserId instanceof Long) {
+                userId = (Long) sessionUserId;
+            }
+        }
+        if (userId != null) {
+            courseenrollment.setUserid(userId);
+            if (StrUtil.isBlank(courseenrollment.getUseraccount())) {
+                UserEntity user = userService.getById(userId);
+                if (user != null && !StrUtil.isBlank(user.getUseraccount())) {
+                    courseenrollment.setUseraccount(user.getUseraccount());
+                }
+            }
+        }
+
+        CourseEntity course = null;
+        Long refId = courseenrollment.getCrossrefid();
+        if (refId != null) {
+            course = courseService.getById(refId);
+        }
+        if (course == null && !StrUtil.isBlank(courseenrollment.getCoursename())) {
+            course = courseService.getOne(new QueryWrapper<CourseEntity>().eq("coursename", courseenrollment.getCoursename()));
+        }
+        if (course != null) {
+            courseenrollment.setCoursename(course.getCoursename());
+            courseenrollment.setCourseimage(course.getCourseimage());
+            courseenrollment.setCoursetype(course.getCoursetype());
+            courseenrollment.setClasstime(course.getClasstime());
+            courseenrollment.setDuration(course.getDuration());
+            courseenrollment.setCoachname(course.getCoachname());
+            courseenrollment.setCoachaccount(course.getCoachaccount());
+            courseenrollment.setCourseprice(course.getCourseprice());
+        }
+
+        Integer quantity = courseenrollment.getQuantity();
+        if (quantity == null || quantity <= 0) {
+            quantity = 1;
+            courseenrollment.setQuantity(quantity);
+        }
+        if (courseenrollment.getCourseprice() != null) {
+            BigDecimal total = BigDecimal.valueOf(courseenrollment.getCourseprice())
+                    .multiply(BigDecimal.valueOf(quantity))
+                    .setScale(2, RoundingMode.HALF_UP);
+            courseenrollment.setTotalprice(total.doubleValue());
+        }
+        if (StrUtil.isBlank(courseenrollment.getIspay())) {
+            courseenrollment.setIspay("未支付");
+        }
+        if (StrUtil.isBlank(courseenrollment.getOrderstatus())) {
+            courseenrollment.setOrderstatus("未支付");
+        }
+    }
 
     /**
     * 后台列表
@@ -166,6 +290,7 @@ public class CourseenrollmentController {
         if (courseenrollment!= null && courseenrollment.getUserid() == null) {
             courseenrollment.setUserid((Long)request.getSession().getAttribute("userId"));
         }
+        fillEnrollmentLockedFields(courseenrollment, request);
         courseenrollmentService.save(courseenrollment);
         {
             NotifyEntity nf_0 = new NotifyEntity();
@@ -175,12 +300,15 @@ public class CourseenrollmentController {
                 nf_0_userId = 1L;
             }
             nf_0.setUserid(nf_0_userId);
-            nf_0.setTitle(String.format("课程报名成功", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
-            nf_0.setContent(String.format("您已成功报名课程《%s》，上课时间：%s", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
+            nf_0.setTitle("课程报名已提交");
+            nf_0.setContent(String.format("您已提交报名课程《%s》，请完成支付，上课时间：%s", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
             nf_0.setMessagetype("报名通知");
             nf_0.setReadstatus("未读");
             nf_0.setSenduser("系统");
             notifyService.save(nf_0);
+        }
+        if ("已支付".equals(String.valueOf(courseenrollment.getIspay()))) {
+            ensureCoachMemberBinding(courseenrollment, request);
         }
         operationLogRecorder.record("courseenrollment", "课程报名记录", "新增", courseenrollment, request);
         return R.ok().put("data",courseenrollment.getId());
@@ -196,6 +324,7 @@ public class CourseenrollmentController {
         if (courseenrollment!= null && courseenrollment.getUserid() == null) {
             courseenrollment.setUserid((Long)request.getSession().getAttribute("userId"));
         }
+        fillEnrollmentLockedFields(courseenrollment, request);
         courseenrollmentService.save(courseenrollment);
         {
             NotifyEntity nf_0 = new NotifyEntity();
@@ -205,12 +334,15 @@ public class CourseenrollmentController {
                 nf_0_userId = 1L;
             }
             nf_0.setUserid(nf_0_userId);
-            nf_0.setTitle(String.format("课程报名成功", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
-            nf_0.setContent(String.format("您已成功报名课程《%s》，上课时间：%s", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
+            nf_0.setTitle("课程报名已提交");
+            nf_0.setContent(String.format("您已提交报名课程《%s》，请完成支付，上课时间：%s", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
             nf_0.setMessagetype("报名通知");
             nf_0.setReadstatus("未读");
             nf_0.setSenduser("系统");
             notifyService.save(nf_0);
+        }
+        if ("已支付".equals(String.valueOf(courseenrollment.getIspay()))) {
+            ensureCoachMemberBinding(courseenrollment, request);
         }
         operationLogRecorder.record("courseenrollment", "课程报名记录", "新增", courseenrollment, request);
         return R.ok().put("data",courseenrollment.getId());
@@ -244,6 +376,9 @@ public class CourseenrollmentController {
             nf_1.setSenduser("系统");
             notifyService.save(nf_1);
             }
+        }
+        if ("已支付".equals(String.valueOf(courseenrollment.getIspay()))) {
+            ensureCoachMemberBinding(courseenrollment, request);
         }
         {
             boolean _send = true;

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.TrainingplanDao">
+
+    <resultMap type="com.entity.TrainingplanEntity" id="trainingplanMap">
+        <result property="id" column="id"/>
+        <result property="planname" column="planname"/>
+        <result property="plangoal" column="plangoal"/>
+        <result property="plancontent" column="plancontent"/>
+        <result property="starttime" column="starttime"/>
+        <result property="endtime" column="endtime"/>
+        <result property="auditstatus" column="auditstatus"/>
+        <result property="auditreply" column="auditreply"/>
+        <result property="planstatus" column="planstatus"/>
+        <result property="userid" column="userid"/>
+        <result property="useraccount" column="useraccount"/>
+        <result property="username" column="username"/>
+        <result property="coachid" column="coachid"/>
+        <result property="coachaccount" column="coachaccount"/>
+        <result property="coachname" column="coachname"/>
+        <result property="addtime" column="addtime"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.TrainingplanVO" >
+        SELECT * FROM trainingplan trainingplan ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.TrainingplanVO" >
+        SELECT trainingplan.* FROM trainingplan trainingplan ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.TrainingplanView" >
+        SELECT trainingplan.* FROM trainingplan trainingplan ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.TrainingplanView" >
+        SELECT * FROM trainingplan trainingplan ${ew.customSqlSegment}
+    </select>
+
+</mapper>

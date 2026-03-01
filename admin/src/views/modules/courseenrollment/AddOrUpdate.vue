@@ -80,9 +80,6 @@
         <el-form-item v-if="type === 'info' || false || read.courseprice" label="课程单价" prop="courseprice">
             <el-input-number v-model="form.courseprice" placeholder="请输入课程单价" controls-position="right" :readonly="type === 'info' || read.courseprice"/>
         </el-form-item>
-        <el-form-item v-if="type === 'info' || true || read.quantity" label="数量" prop="quantity">
-            <el-input-number v-model="form.quantity" placeholder="请输入数量" controls-position="right" :readonly="type === 'info' || read.quantity"/>
-        </el-form-item>
         <el-form-item v-if="type === 'info' || false || read.totalprice" label="总价" prop="totalprice">
             <el-input-number v-model="form.totalprice" placeholder="请输入总价" controls-position="right" :readonly="type === 'info' || read.totalprice"/>
         </el-form-item>
@@ -92,17 +89,8 @@
                 <el-option label="已支付" value="已支付"/>
                 <el-option label="已取消" value="已取消"/>
                 <el-option label="已退款" value="已退款"/>
-                <el-option label="已发货" value="已发货"/>
                 <el-option label="已完成" value="已完成"/>
             </el-select>
-        </el-form-item>
-        <el-form-item v-if="type === 'info' || false || read.logistics" label="物流信息" prop="logistics">
-            <el-input
-                v-model="form.logistics"
-                placeholder="请输入物流信息"
-                :readonly="type === 'info' || read.logistics"
-                clearable
-            />
         </el-form-item>
 
       </el-form>
@@ -157,7 +145,7 @@
     useraccount: '',
     coachaccount: '',
     courseprice: undefined,
-    quantity: undefined,
+    quantity: 1,
     totalprice: undefined,
     orderstatus: '未支付',
     logistics: '',
@@ -214,7 +202,7 @@
     useraccount: false,
     coachaccount: false,
     courseprice: false,
-    quantity: false,
+    quantity: true,
     totalprice: false,
     orderstatus: false,
     logistics: false,
@@ -244,7 +232,6 @@
     coursename: [ { trigger: 'blur' , message: '课程名称不能为空' , required: true } ],
     duration: [ { validator: validateNumber , trigger: 'blur' } ],
     courseprice: [ { validator: validateNumber , trigger: 'blur' } ],
-    quantity: [ { trigger: 'blur' , message: '数量不能为空' , required: true }, { validator: validateNumber , trigger: 'blur' } ],
     totalprice: [ { validator: validateNumber , trigger: 'blur' } ],
   }
 
@@ -403,7 +390,7 @@
       useraccount: '',
       coachaccount: '',
       courseprice: undefined,
-      quantity: undefined,
+      quantity: 1,
       totalprice: undefined,
       orderstatus: '未支付',
       logistics: '',
@@ -925,4 +912,3 @@
     init
   })
 </script>
-

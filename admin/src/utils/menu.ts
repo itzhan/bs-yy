@@ -388,6 +388,56 @@ export const menuConfig = [
                     ]
                 }
                 ,
+                {
+                    "menu": "训练管理",
+                    "child": [
+{
+    "menu": "我的会员",
+    "tableName": "coachmember",
+    "allButtons": [
+        "查看"    ],
+    "buttons": [
+        "查看"    ]
+}
+                        ,{
+    "menu": "训练计划",
+    "tableName": "trainingplan",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "新增","查看","修改","删除"    ]
+}
+
+                        ,{
+    "menu": "训练计划明细",
+    "tableName": "trainingplanitem",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "新增","查看","修改","删除"    ]
+}
+
+                        ,{
+    "menu": "训练记录",
+    "tableName": "trainingrecord",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "新增","查看","修改","删除"    ]
+}
+
+                        ,{
+    "menu": "教练评价",
+    "tableName": "coachreview",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "查看","修改"    ]
+}
+
+                    ]
+                }
+                ,
             ]
 }
 ,
@@ -428,6 +478,56 @@ export const menuConfig = [
     "buttons": [
         "新增","查看","修改","删除" ,"私聊"    ]
 }
+                    ]
+                }
+                ,
+                {
+                    "menu": "训练管理",
+                    "child": [
+{
+    "menu": "教练-会员绑定",
+    "tableName": "coachmember",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "新增","查看","修改","删除"    ]
+}
+                        ,{
+    "menu": "训练计划",
+    "tableName": "trainingplan",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "新增","查看","修改","删除"    ]
+}
+
+                        ,{
+    "menu": "训练计划明细",
+    "tableName": "trainingplanitem",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "新增","查看","修改","删除"    ]
+}
+
+                        ,{
+    "menu": "训练记录",
+    "tableName": "trainingrecord",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "新增","查看","修改","删除"    ]
+}
+
+                        ,{
+    "menu": "教练评价",
+    "tableName": "coachreview",
+    "allButtons": [
+        "新增","查看","修改","删除","导出"    ],
+    "buttons": [
+        "新增","查看","修改","删除"    ]
+}
+
                     ]
                 }
                 ,

@@ -69,6 +69,9 @@
         clearable
       />
     </el-form-item>
+    <el-form-item label="课程单价" prop="courseprice">
+      <el-input-number v-model="form.courseprice" placeholder="请输入课程单价" :step="1" :controls="false" :disabled="read.courseprice" />
+    </el-form-item>
     <el-form-item label="剩余名额" prop="quota">
       <el-input-number v-model="form.quota" placeholder="请输入剩余名额" :step="1" :controls="false" :disabled="read.quota" />
     </el-form-item>
@@ -137,6 +140,8 @@ const initialFormValues: Record<string, any> = {
       '',
     coachaccount: 
       '',
+    courseprice:
+      undefined,
     quota: 
       undefined,
     coursedesc: 
@@ -244,7 +249,7 @@ if (imageRecognitionConfig.enabled && imageRecognitionConfig.sourceField) {
 
 let currentEditId = 0
 
-const read = reactive<Record<string, boolean>>({
+  const read = reactive<Record<string, boolean>>({
   'coursename': false,
   'courseimage': false,
   'coursetype': false,
@@ -252,6 +257,7 @@ const read = reactive<Record<string, boolean>>({
   'duration': false,
   'coachname': false,
   'coachaccount': false,
+  'courseprice': false,
   'quota': false,
   'coursedesc': false,
   'addtime': false,
@@ -309,6 +315,9 @@ const rules = reactive<FormRules>({
     ],
     'coachaccount': [
       { required: false, message: '请输入教练账号', trigger: 'blur' }
+    ],
+    'courseprice': [
+      { required: false, message: '请输入课程单价', trigger: 'blur' }
     ],
     'quota': [
       { required: false, message: '请输入剩余名额', trigger: 'blur' }

@@ -30,6 +30,96 @@ export const menuConfig = [
         }
                 ,
         {
+            "menu": "教练",
+            "child": [
+{
+    "menu": "教练",
+    "tableName": "coach",
+    "hidden": false,
+    "allButtons": [
+        "查看","私聊"    ],
+    "buttons": [
+        "查看" ,"私聊"    ]
+}
+            ]
+        }
+                ,
+        {
+            "menu": "我的教练",
+            "child": [
+{
+    "menu": "我的教练",
+    "tableName": "coachmember",
+    "hidden": true,
+    "allButtons": [
+        "查看"    ],
+    "buttons": [
+        "查看"    ]
+}
+            ]
+        }
+                ,
+        {
+            "menu": "训练计划",
+            "child": [
+{
+    "menu": "训练计划",
+    "tableName": "trainingplan",
+    "hidden": false,
+    "allButtons": [
+        "查看"    ],
+    "buttons": [
+        "查看"    ]
+}
+            ]
+        }
+                ,
+        {
+            "menu": "训练计划明细",
+            "child": [
+{
+    "menu": "训练计划明细",
+    "tableName": "trainingplanitem",
+    "hidden": true,
+    "allButtons": [
+        "查看"    ],
+    "buttons": [
+        "查看"    ]
+}
+            ]
+        }
+                ,
+        {
+            "menu": "训练记录",
+            "child": [
+{
+    "menu": "训练记录",
+    "tableName": "trainingrecord",
+    "hidden": false,
+    "allButtons": [
+        "查看"    ],
+    "buttons": [
+        "查看"    ]
+}
+            ]
+        }
+                ,
+        {
+            "menu": "教练评价",
+            "child": [
+{
+    "menu": "教练评价",
+    "tableName": "coachreview",
+    "hidden": true,
+    "allButtons": [
+        "查看","新增","修改","删除"    ],
+    "buttons": [
+        "查看" ,"新增"    ]
+}
+            ]
+        }
+                ,
+        {
             "menu": "课程报名记录",
             "child": [
 {

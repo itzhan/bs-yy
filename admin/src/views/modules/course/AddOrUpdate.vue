@@ -69,6 +69,9 @@
                 clearable
             />
         </el-form-item>
+        <el-form-item v-if="type === 'info' || true || read.courseprice" label="课程单价" prop="courseprice">
+            <el-input-number v-model="form.courseprice" placeholder="请输入课程单价" controls-position="right" :readonly="type === 'info' || read.courseprice"/>
+        </el-form-item>
         <el-form-item v-if="type === 'info' || true || read.quota" label="剩余名额" prop="quota">
             <el-input-number v-model="form.quota" placeholder="请输入剩余名额" controls-position="right" :readonly="type === 'info' || read.quota"/>
         </el-form-item>
@@ -132,6 +135,7 @@
     duration: undefined,
     coachname: '',
     coachaccount: '',
+    courseprice: undefined,
     quota: undefined,
     coursedesc: '',
   })
@@ -185,6 +189,7 @@
     duration: false,
     coachname: false,
     coachaccount: false,
+    courseprice: false,
     quota: false,
     coursedesc: false,
   })
@@ -215,6 +220,7 @@
     classtime: [ { trigger: 'blur' , message: '上课时间不能为空' , required: true } ],
     duration: [ { trigger: 'blur' , message: '课程时长不能为空' , required: true }, { validator: validateNumber , trigger: 'blur' } ],
     coachname: [ { trigger: 'blur' , message: '教练不能为空' , required: true } ],
+    courseprice: [ { trigger: 'blur' , message: '课程单价不能为空' , required: true }, { validator: validateNumber , trigger: 'blur' } ],
     quota: [ { trigger: 'blur' , message: '剩余名额不能为空' , required: true }, { validator: validateNumber , trigger: 'blur' } ],
   }
 
@@ -371,6 +377,7 @@
       duration: undefined,
       coachname: '',
       coachaccount: '',
+      courseprice: undefined,
       quota: undefined,
       coursedesc: '',
     })
@@ -850,4 +857,3 @@
     init
   })
 </script>
-

@@ -1,0 +1,32 @@
+# ===== Git =====
+.git
+.gitignore
+
+# ===== Node =====
+**/node_modules
+**/dist
+
+# ===== Java =====
+**/target
+**/*.class
+
+# ===== IDE =====
+.idea
+.vscode
+*.iml
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Docker =====
+docker-compose.yml
+.dockerignore
+.env.docker
+
+# ===== Misc =====
+*.md
+*.zip
+*.docx
+*.doc
+upload/

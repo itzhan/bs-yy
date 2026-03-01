@@ -135,6 +135,10 @@
             <span class="value">{{ formatField(item.coachname) }}</span>
           </div>
           <div class="info-item">
+            <span class="label">课程单价：</span>
+            <span class="value">{{ formatField(item.courseprice) }}</span>
+          </div>
+          <div class="info-item">
             <span class="label">剩余名额：</span>
             <span class="value">{{ formatField(item.quota) }}</span>
           </div>
@@ -273,6 +277,7 @@ const summaryFields = [
   { name: 'classtime', label: '上课时间', formType: 'datetime' },
   { name: 'duration', label: '课程时长', formType: 'number' },
   { name: 'coachname', label: '教练', formType: 'select' },
+  { name: 'courseprice', label: '课程单价', formType: 'number' },
   { name: 'quota', label: '剩余名额', formType: 'number' },
   { name: 'addtime', label: '创建时间', formType: 'datetime' }
 ]

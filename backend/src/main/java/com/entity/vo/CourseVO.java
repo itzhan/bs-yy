@@ -51,6 +51,10 @@ public class CourseVO  implements Serializable {
      */
     private String coachaccount;
     /*
+     * 课程单价
+     */
+    private Double courseprice;
+    /*
      * 剩余名额
      */
     private Integer quota;
@@ -161,6 +165,14 @@ public class CourseVO  implements Serializable {
 
     public void setCoachaccount(String coachaccount) {
         this.coachaccount = coachaccount;
+    }
+
+    public Double getCourseprice() {
+        return courseprice;
+    }
+
+    public void setCourseprice(Double courseprice) {
+        this.courseprice = courseprice;
     }
 
     public Integer getQuota() {

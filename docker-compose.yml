@@ -1,0 +1,97 @@
+# ============================================================
+#  健身房管理系统 — Docker Compose 一键部署
+#  使用方式：docker compose up --build -d
+#  停止方式：docker compose down
+# ============================================================
+
+services:
+  # -------------------- MySQL --------------------
+  mysql:
+    image: mysql:8.0
+    container_name: gym-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ab123168}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-gym_vclqwy4}
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    command: >
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-ab123168}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - gym-network
+
+  # -------------------- 后端 --------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gym-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # 数据库连接 — 覆盖 application.yml 中的默认值
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-gym_vclqwy4}?rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&allowMultiQueries=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ab123168}
+      TZ: Asia/Shanghai
+    ports:
+      - "${BACKEND_PORT:-8888}:8888"
+    volumes:
+      - upload_data:/app/upload
+    networks:
+      - gym-network
+
+  # -------------------- 管理端 --------------------
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /gym_vclqwy4
+    container_name: gym-admin
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${ADMIN_PORT:-3001}:80"
+    networks:
+      - gym-network
+
+  # -------------------- 用户端 --------------------
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /gym_vclqwy4
+    container_name: gym-front
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONT_PORT:-3002}:80"
+    networks:
+      - gym-network
+
+volumes:
+  mysql_data:
+    driver: local
+  upload_data:
+    driver: local
+
+networks:
+  gym-network:
+    driver: bridge

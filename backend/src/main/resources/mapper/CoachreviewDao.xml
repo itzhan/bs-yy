@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.CoachreviewDao">
+
+    <resultMap type="com.entity.CoachreviewEntity" id="coachreviewMap">
+        <result property="id" column="id"/>
+        <result property="coachid" column="coachid"/>
+        <result property="coachaccount" column="coachaccount"/>
+        <result property="coachname" column="coachname"/>
+        <result property="userid" column="userid"/>
+        <result property="useraccount" column="useraccount"/>
+        <result property="username" column="username"/>
+        <result property="userimage" column="userimage"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="reply" column="reply"/>
+        <result property="addtime" column="addtime"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.CoachreviewVO" >
+        SELECT * FROM coachreview coachreview ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.CoachreviewVO" >
+        SELECT coachreview.* FROM coachreview coachreview ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.CoachreviewView" >
+        SELECT coachreview.* FROM coachreview coachreview ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.CoachreviewView" >
+        SELECT * FROM coachreview coachreview ${ew.customSqlSegment}
+    </select>
+
+</mapper>

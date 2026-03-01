@@ -56,7 +56,6 @@
                     <el-option label="已支付" value="已支付"/>
                     <el-option label="已取消" value="已取消"/>
                     <el-option label="已退款" value="已退款"/>
-                    <el-option label="已发货" value="已发货"/>
                     <el-option label="已完成" value="已完成"/>
                 </el-select>
             </div>
@@ -225,42 +224,6 @@
                 @click="refundcourseenrollmentCrossAddOrUpdateHandler(scope.row, 'cross', '退款已处理', 'orderstatus', '已退款', '退款')"
             >
             退款
-            </el-button>
-        <el-button
-                v-if="isAuth('courseenrollment', '发货')"
-                type="success"
-                size="small"
-                @click="inlineCrossActionHandler(
-                  scope.row,
-                  '已发货',
-                  'orderstatus',
-                  '已发货',
-                  '',
-                  'plus',
-                  '',
-                  '',
-                  '发货'
-                )"
-            >
-            发货
-            </el-button>
-        <el-button
-                v-if="isAuth('courseenrollment', '确认收货')"
-                type="success"
-                size="small"
-                @click="inlineCrossActionHandler(
-                  scope.row,
-                  '已确认收货',
-                  'orderstatus',
-                  '已完成',
-                  '',
-                  'plus',
-                  '',
-                  '',
-                  '确认收货'
-                )"
-            >
-            确认收货
             </el-button>
           </template>
         </el-table-column>
@@ -997,37 +960,10 @@
       }
     }
     const extraPayload: Record<string, any> = {}
-    const needsLogistics = btnName === '发货'
-    if (needsLogistics) {
-      const defaultValue = String(row?.logistics || '').trim()
-      try {
-        const { value } = await ElMessageBox.prompt(
-          '请输入物流公司、运单号等信息（必填）',
-          '发货处理',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            inputType: 'textarea',
-            inputPlaceholder: '例如：顺丰速运 SF1234567890',
-            inputValue: defaultValue,
-            autofocus: false
-          }
-        )
-        const logisticsText = String(value ?? '').trim()
-        if (!logisticsText) {
-          ElMessage.warning('请填写物流信息')
-          return
-        }
-        extraPayload.logistics = logisticsText
-      } catch {
-        return
-      }
-    } else {
-      try {
-        await ElMessageBox.confirm(confirmMessage, confirmTitle)
-      } catch {
-        return
-      }
+    try {
+      await ElMessageBox.confirm(confirmMessage, confirmTitle)
+    } catch {
+      return
     }
     try {
       // 1) 可选：更新当前行状态

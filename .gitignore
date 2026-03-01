@@ -95,3 +95,25 @@ Icon?
 # ===== Misc =====
 **/*.pid
 **/*.seed
+
+# ===== Documents =====
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pptx
+*.ppt
+*.pdf
+
+# ===== Archives =====
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tar
+
+# ===== Upload (runtime data) =====
+upload/
+
+# ===== Docker =====
+.env.docker

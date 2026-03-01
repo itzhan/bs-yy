@@ -43,7 +43,6 @@
 
       <div class="search-actions">
         <el-button type="primary" @click="triggerSearch">查询</el-button>
-        <el-button v-if="canCreate" type="primary" @click="handleAdd">添加</el-button>
       </div>
     </el-form>
 
@@ -101,11 +100,6 @@
           class="option"
           :class="selectState.orderstatus === 4 ? 'active' : ''"
           @click="selectDictOption('orderstatus', 4)"
-        >已发货</div>
-        <div
-          class="option"
-          :class="selectState.orderstatus === 5 ? 'active' : ''"
-          @click="selectDictOption('orderstatus', 5)"
         >已完成</div>
       </div>
     </div>
@@ -287,7 +281,6 @@ function resolveCatePreferParam(table: string) {
 }
 
 const canViewPermission = useAuth('courseenrollment', '查看')
-const canCreate = !false && useAuth('courseenrollment', '新增')
 const canView = computed(() => canViewPermission.value || !token.value)
 
 const imageField = 'courseimage'
@@ -304,7 +297,7 @@ const hotSummaryFields = computed(() => summaryFields.slice(0, 2))
 
 const selectFilters = [
   { field: 'ispay', label: '是否支付', options: ['未支付', '已支付'] },
-  { field: 'orderstatus', label: '状态', options: ['未支付', '已支付', '已取消', '已退款', '已发货', '已完成'] }
+  { field: 'orderstatus', label: '状态', options: ['未支付', '已支付', '已取消', '已退款', '已完成'] }
 ]
 const categoryConfig = { field: 'coursename', label: '课程名称', table: 'course', column: 'coursename', imageField: 'courseimage' }
 const showLike = false
@@ -507,12 +500,6 @@ function toggleSort(field: string) {
 function triggerSearch() {
   pageIndex.value = 1
   fetchList()
-}
-
-function handleAdd() {
-  const query: Record<string, any> = {}
-  if (centerType.value) query.centerType = 1
-  router.push({ path: '/index/courseenrollmentAdd', query })
 }
 
 function handleBack() {

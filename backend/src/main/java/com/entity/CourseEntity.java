@@ -63,6 +63,11 @@ public class CourseEntity implements Serializable {
     @TableField(value = "`coachaccount`")
     private String coachaccount;
     /**
+     * 课程单价
+     */
+    @TableField(value = "`courseprice`")
+    private Double courseprice;
+    /**
      * 剩余名额
      */
     @TableField(value = "`quota`")
@@ -184,6 +189,14 @@ public class CourseEntity implements Serializable {
 
     public void setCoachaccount(String coachaccount) {
         this.coachaccount = coachaccount;
+    }
+
+    public Double getCourseprice() {
+        return courseprice;
+    }
+
+    public void setCourseprice(Double courseprice) {
+        this.courseprice = courseprice;
     }
 
     public Integer getQuota() {

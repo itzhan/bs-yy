@@ -162,6 +162,7 @@
         <el-table-column prop="classtime" label="上课时间" />
         <el-table-column prop="duration" label="课程时长" />
         <el-table-column prop="coachname" label="教练" />
+        <el-table-column prop="courseprice" label="课程单价" />
         <el-table-column prop="quota" label="剩余名额" />
         <el-table-column prop="auditstatus" label="审核状态">
         <template #default="scope">

@@ -85,6 +85,7 @@ export interface CourseItem {
     duration?: number
     coachname?: string
     coachaccount?: string
+    courseprice?: number
     quota?: number
     coursedesc?: string
     addtime?: string

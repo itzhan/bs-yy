@@ -58,20 +58,12 @@
               <span class="text">{{ info.courseprice }}</span>
             </div>
             <div class="info-item">
-              <span class="label">数量：</span>
-              <span class="text">{{ info.quantity }}</span>
-            </div>
-            <div class="info-item">
               <span class="label">总价：</span>
               <span class="text">{{ info.totalprice }}</span>
             </div>
             <div class="info-item">
               <span class="label">状态：</span>
               <span class="text">{{ info.orderstatus }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">物流信息：</span>
-              <span class="text">{{ info.logistics }}</span>
             </div>
           </div>
 
@@ -104,22 +96,6 @@
               :title="crossDisabledReason('退款') || undefined"
               @click="onCross('退款')"
             >退款</el-button>
-            <el-button
-              size="small"
-              type="primary"
-              v-if="hasActionPermission('发货')"
-              :disabled="isCrossDisabled('发货')"
-              :title="crossDisabledReason('发货') || undefined"
-              @click="onCross('发货')"
-            >发货</el-button>
-            <el-button
-              size="small"
-              type="primary"
-              v-if="hasActionPermission('确认收货')"
-              :disabled="isCrossDisabled('确认收货')"
-              :title="crossDisabledReason('确认收货') || undefined"
-              @click="onCross('确认收货')"
-            >确认收货</el-button>
           </div>
         </div>
       </div>
@@ -320,11 +296,9 @@ const isMallProductTable = false
 const isMallOrdersTable = false
 const hideMallCancelButton = isMallProductTable || isMallOrdersTable
 const mallCrossButtonNames: string[] = [
-  '取消课程报名记录','退款','发货','确认收货'
+  '取消课程报名记录','退款'
 ]
-const frontDisabledButtons = new Set<string>([
-  '发货'
-])
+const frontDisabledButtons = new Set<string>([])
 const actionPermissionSet = computed(() => {
   const granted = new Set<string>(tableButtons.value)
   mallCrossButtonNames.forEach((name) => {
@@ -384,8 +358,6 @@ const orderStatusMeta = computed(() => {
         return { label: '已取消', className: 'status-cancel review' }
       case '已退款':
         return { label: '已退款', className: 'status-refund review' }
-      case '已发货':
-        return { label: '已发货', className: 'status-shipping paid' }
       case '已完成':
         return { label: '已完成', className: 'status-finished paid' }
       default:
@@ -492,7 +464,7 @@ const payDialogVisible = ref(false)
 const payProcessing = ref(false)
 const payType = ref('')
 const payAmountField = 'courseprice'
-const payQuantityField = 'quantity'
+const payQuantityField = ''
 const payTotalFieldName = 'totalprice'
 const payOptions = [
   { value: 'balance', label: '余额支付', img: '' },
@@ -791,7 +763,7 @@ async function submitPay() {
       if (info.id) {
         await loadDetail(info.id)
       }
-      ElMessage.success('支付成功')
+      ElMessage.success('支付成功，报名成功')
       resetPayDialog()
     } else {
       ElMessage.error(res?.msg || '支付失败')
@@ -822,6 +794,11 @@ onMounted(async () => {
   await loadDetail(id)
   ensureLocalUserInfo()
   fetchUserSession().catch(() => {})
+  if (String((route.query as any).pay || '') === '1') {
+    setTimeout(() => {
+      openPayDialog()
+    }, 0)
+  }
 })
 
 watch(canView, (val) => {
@@ -901,34 +878,6 @@ const crossButtonsConfig: CrossButtonConfig[] = [
     prevValue: null,
     prevButtonName: '',
     flowIndex: -1
-  },
-  {
-    name: '发货',
-    targetTable: '',
-    tips: '已发货',
-    statusField: 'orderstatus',
-    statusValue: '已发货',
-    stockTargetTable: '',
-    stockMode: '',
-    stockField: '',
-    stockAmountField: '',
-    prevValue: null,
-    prevButtonName: '',
-    flowIndex: -1
-  },
-  {
-    name: '确认收货',
-    targetTable: '',
-    tips: '已确认收货',
-    statusField: 'orderstatus',
-    statusValue: '已完成',
-    stockTargetTable: '',
-    stockMode: '',
-    stockField: '',
-    stockAmountField: '',
-    prevValue: null,
-    prevButtonName: '',
-    flowIndex: -1
   }]
 
 const crossStatusFlows = new Map<string, string[]>()
@@ -981,25 +930,12 @@ function evaluatePaymentCrossGuard(button: CrossButtonConfig, showMessage = fals
       return { ok: true, message: '' }
     case '已退款':
       if (!payCompleted.value) return warn('未支付订单无需退款')
-      if (!['已支付', '已发货'].includes(current)) {
-        const message = current ? `当前状态为${current}，无法退款` : '当前状态不支持退款'
-        return warn(message)
-      }
-      return { ok: true, message: '' }
-    case '已发货':
-      if (!payCompleted.value) return warn('请先完成支付')
-      if (current && !['已支付', '已发货'].includes(current)) {
-        const message = current === '已退款'
-          ? '已退款订单无法发货'
-          : `当前状态为${current}，无法发货`
+      if (current && current !== '已支付') {
+        const message = `当前状态为${current}，无法退款`
         return warn(message)
       }
       return { ok: true, message: '' }
     case '已完成':
-      if (current !== '已发货') {
-        const message = current ? `当前状态为${current}，无法确认收货` : '请先发货后再确认收货'
-        return warn(message)
-      }
       return { ok: true, message: '' }
     default:
       return { ok: true, message: '' }
@@ -1465,6 +1401,3 @@ onUnmounted(() => {
   closeWebSocket()
 })
 </script>
-
-
-

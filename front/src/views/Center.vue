@@ -281,6 +281,29 @@
                     @current-change="page => handleCenterTabPageChange(tab.name, page)"
                   />
                 </div>
+                <div
+                  v-if="tab.table === 'coachmember' && centerDetailState[tab.name]?.visible"
+                  :id="`center-detail-${tab.name}`"
+                  class="center-detail-block"
+                >
+                  <el-card shadow="hover">
+                    <template #header>
+                      <div class="center-detail-header">
+                        <span>绑定详情</span>
+                        <el-button type="primary" link @click="closeCenterDetail(tab.name)">收起</el-button>
+                      </div>
+                    </template>
+                    <el-skeleton v-if="centerDetailState[tab.name].loading" :rows="4" animated />
+                    <el-descriptions v-else-if="centerDetailState[tab.name].detail" :column="2" border>
+                      <el-descriptions-item label="教练姓名">{{ centerDetailState[tab.name].detail.coachname }}</el-descriptions-item>
+                      <el-descriptions-item label="教练账号">{{ centerDetailState[tab.name].detail.coachaccount }}</el-descriptions-item>
+                      <el-descriptions-item label="绑定状态">{{ centerDetailState[tab.name].detail.bindstatus }}</el-descriptions-item>
+                      <el-descriptions-item label="绑定时间">{{ centerDetailState[tab.name].detail.addtime }}</el-descriptions-item>
+                      <el-descriptions-item label="备注" :span="2">{{ centerDetailState[tab.name].detail.remark }}</el-descriptions-item>
+                    </el-descriptions>
+                    <el-empty v-else description="暂无数据" />
+                  </el-card>
+                </div>
               </template>
             </div>
           </el-tab-pane>
@@ -560,6 +583,25 @@ const centerTabDefs: CenterTabDef[] = [
     ],
     emptyText: '暂无意见反馈'
   }
+  ,
+  {
+    name: 'center_coachmember',
+    label: '我的教练',
+    table: 'coachmember',
+    userField: 'userid',
+    valueSource: 'userid',
+    sessionField: undefined,
+    queryType: 'eq',
+    pageSize: 10,
+    extraQuery: undefined,
+    displayFields: [
+      { prop: 'coachname', label: '教练姓名', formType: 'input' },
+      { prop: 'coachaccount', label: '教练账号', formType: 'input' },
+      { prop: 'bindstatus', label: '绑定状态', formType: 'select' },
+      { prop: 'addtime', label: '绑定时间', formType: 'datetime' }
+    ],
+    emptyText: '暂无绑定教练'
+  }
 ]
 
 const centerTabState = reactive<Record<string, CenterTabState>>({})
@@ -572,6 +614,14 @@ centerTabDefs.forEach(tab => {
     total: 0,
     error: '',
     initialized: false
+  }
+})
+const centerDetailState = reactive<Record<string, { visible: boolean; loading: boolean; detail: any }>>({})
+centerTabDefs.forEach(tab => {
+  centerDetailState[tab.name] = {
+    visible: false,
+    loading: false,
+    detail: null
   }
 })
 const notifyTabName = 'notify'
@@ -1774,12 +1824,48 @@ function goCenterModule(tab: CenterTabDef) {
 
 function openCenterDetail(tab: CenterTabDef, row: any) {
   if (!ensureLogin()) return
+  if (tab.table === 'coachmember') {
+    openCenterCoachmemberDetail(tab, row)
+    return
+  }
   const idVal = row?.id ?? row?.ID ?? row?.Id
   if (!idVal) {
     router.push({ path: '/index/' + tab.table, query: { [tab.userField]: resolveCenterFilterValue(tab) } })
     return
   }
   router.push({ path: '/index/' + tab.table + 'Detail', query: { id: idVal } })
+}
+
+async function openCenterCoachmemberDetail(tab: CenterTabDef, row: any) {
+  const idVal = row?.id ?? row?.ID ?? row?.Id
+  if (!idVal) {
+    return
+  }
+  const state = centerDetailState[tab.name]
+  if (!state) return
+  state.visible = true
+  state.loading = true
+  state.detail = null
+  try {
+    const res: any = await http.get(`coachmember/detail/${idVal}`)
+    state.detail = res?.data || null
+  } catch {
+    state.detail = null
+  } finally {
+    state.loading = false
+    await nextTick()
+    const el = document.getElementById(`center-detail-${tab.name}`)
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+}
+
+function closeCenterDetail(tabName: string) {
+  const state = centerDetailState[tabName]
+  if (!state) return
+  state.visible = false
+  state.detail = null
 }
 
 function formatCenterValue(row: any, field: CenterTabField) {
@@ -1988,6 +2074,14 @@ onUnmounted(() => {
   border-radius: 12px;
   border: 1px dashed rgba(245, 158, 11, 0.4);
   background: linear-gradient(135deg, rgba(255, 247, 237, 0.95), rgba(255, 255, 255, 0.95));
+}
+.center-detail-block {
+  margin-top: 16px;
+}
+.center-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .coupon-card.disabled {
   opacity: 0.55;

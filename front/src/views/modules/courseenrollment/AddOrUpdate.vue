@@ -14,7 +14,7 @@
         class="form-main"
       >
     <el-form-item label="课程名称" prop="coursename">
-      <el-select v-model="form.coursename" placeholder="请选择课程名称" clearable :disabled="read.coursename">
+      <el-select v-model="form.coursename" placeholder="请选择课程名称" clearable :disabled="read.coursename || isCross">
         <el-option
           v-for="opt in categoryOptions.coursename"
           :key="opt"
@@ -31,7 +31,7 @@
       />
     </el-form-item>
     <el-form-item label="课程分类" prop="coursetype">
-      <el-select v-model="form.coursetype" placeholder="请选择课程分类" clearable :disabled="read.coursetype">
+      <el-select v-model="form.coursetype" placeholder="请选择课程分类" clearable :disabled="read.coursetype || isCross">
         <el-option
           v-for="opt in categoryOptions.coursetype"
           :key="opt"
@@ -46,26 +46,18 @@
         type="datetime"
         value-format="YYYY-MM-DD HH:mm:ss"
         placeholder="请选择上课时间"
-        :disabled="read.classtime"
+        :disabled="read.classtime || isCross"
         clearable
       />
     </el-form-item>
     <el-form-item label="课程时长" prop="duration">
-      <el-input-number v-model="form.duration" placeholder="请输入课程时长" :step="1" :controls="false" :disabled="read.duration" />
+      <el-input-number v-model="form.duration" placeholder="请输入课程时长" :step="1" :controls="false" :disabled="read.duration || isCross" />
     </el-form-item>
     <el-form-item label="教练" prop="coachname">
       <el-input
         v-model="form.coachname"
         :placeholder="'请输入教练'"
-        :readonly="read.coachname"
-        clearable
-      />
-    </el-form-item>
-    <el-form-item label="用户账号" prop="useraccount">
-      <el-input
-        v-model="form.useraccount"
-        :placeholder="'请输入用户账号'"
-        :readonly="read.useraccount"
+        :readonly="true"
         clearable
       />
     </el-form-item>
@@ -73,36 +65,15 @@
       <el-input
         v-model="form.coachaccount"
         :placeholder="'请输入教练账号'"
-        :readonly="read.coachaccount"
+        :readonly="true"
         clearable
       />
     </el-form-item>
     <el-form-item label="课程单价" prop="courseprice">
-      <el-input-number v-model="form.courseprice" placeholder="请输入课程单价" :step="1" :controls="false" :disabled="read.courseprice" />
-    </el-form-item>
-    <el-form-item label="数量" prop="quantity">
-      <el-input-number v-model="form.quantity" placeholder="请输入数量" :step="1" :controls="false" :disabled="read.quantity" />
+      <el-input-number v-model="form.courseprice" placeholder="请输入课程单价" :step="1" :controls="false" :disabled="true" />
     </el-form-item>
     <el-form-item label="总价" prop="totalprice">
       <el-input-number v-model="form.totalprice" placeholder="请输入总价" :step="1" :controls="false" :disabled="read.totalprice" />
-    </el-form-item>
-    <el-form-item label="状态" prop="orderstatus">
-      <el-select v-model="form.orderstatus" placeholder="请选择状态" clearable :disabled="read.orderstatus">
-        <el-option
-          v-for="opt in dictOptions.orderstatus"
-          :key="opt"
-          :label="opt"
-          :value="opt"
-        />
-      </el-select>
-    </el-form-item>
-    <el-form-item label="物流信息" prop="logistics">
-      <el-input
-        v-model="form.logistics"
-        :placeholder="'请输入物流信息'"
-        :readonly="read.logistics"
-        clearable
-      />
     </el-form-item>
         <div class="form-actions">
           <el-button class="confirm-btn" type="primary" :loading="saving" @click="handleSubmit">提交</el-button>
@@ -166,7 +137,7 @@ const initialFormValues: Record<string, any> = {
     courseprice: 
       undefined,
     quantity: 
-      undefined,
+      1,
     totalprice: 
       undefined,
     addtime: 
@@ -299,6 +270,18 @@ function resetReadState() {
   Object.keys(read).forEach((key) => {
     read[key] = false
   })
+  if (Object.prototype.hasOwnProperty.call(read, 'coachname')) {
+    read['coachname'] = true
+  }
+  if (Object.prototype.hasOwnProperty.call(read, 'coachaccount')) {
+    read['coachaccount'] = true
+  }
+  if (Object.prototype.hasOwnProperty.call(read, 'courseprice')) {
+    read['courseprice'] = true
+  }
+  if (Object.prototype.hasOwnProperty.call(read, 'quantity')) {
+    read['quantity'] = true
+  }
   if (Object.prototype.hasOwnProperty.call(read, 'ispay')) {
     read['ispay'] = true
   }
@@ -309,7 +292,7 @@ function resetReadState() {
 
 const dictOptions = reactive<Record<string, string[]>>({
   'ispay': ['未支付', '已支付'],
-  'orderstatus': ['未支付', '已支付', '已取消', '已退款', '已发货', '已完成'],
+  'orderstatus': ['未支付', '已支付', '已取消', '已退款', '已完成'],
 })
 
 const categoryOptions = reactive<Record<string, string[]>>({
@@ -362,9 +345,6 @@ const rules = reactive<FormRules>({
     ],
     'orderstatus': [
       { required: false, message: '请输入状态', trigger: 'blur' }
-    ],
-    'logistics': [
-      { required: false, message: '请输入物流信息', trigger: 'blur' }
     ],
     'crossuserid': [
       { required: false, message: '请输入跨表用户id', trigger: 'blur' }
@@ -496,6 +476,10 @@ function applyCrossPrefill() {
     if (Object.prototype.hasOwnProperty.call(form, 'orderstatus')) {
       form.orderstatus = '未支付'
       read['orderstatus'] = true
+    }
+    if (Object.prototype.hasOwnProperty.call(form, 'quantity')) {
+      form.quantity = 1
+      read['quantity'] = true
     }
   } catch (error) {
     console.warn('跨表数据预填失败', error)
@@ -730,6 +714,8 @@ async function handleSubmit() {
     const payload = { ...form }
     const res: any = await http.post(api, payload)
     if (res?.code === 0) {
+      const savedIdRaw = (res as any)?.data ?? (res as any)?.data?.id ?? (res as any)?.id
+      const savedId = Number(savedIdRaw)
       if (isCross.value) {
         try {
           // 按预演计划回写源表库存
@@ -745,6 +731,10 @@ async function handleSubmit() {
           await applyPointAdjustmentAfterSave()
         } finally {
           clearCrossCache()
+        }
+        if (!embedMode.value && Number.isFinite(savedId) && savedId > 0) {
+          router.replace({ path: '/index/courseenrollmentDetail', query: { id: String(savedId), pay: '1' } })
+          return
         }
       } else {
         await applyPointAdjustmentAfterSave()

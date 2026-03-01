@@ -58,6 +58,10 @@
               <span class="text">{{ info.coachaccount }}</span>
             </div>
             <div class="info-item">
+              <span class="label">课程单价：</span>
+              <span class="text">{{ info.courseprice }}</span>
+            </div>
+            <div class="info-item">
               <span class="label">剩余名额：</span>
               <span class="text">{{ info.quota }}</span>
             </div>
@@ -1535,6 +1539,5 @@ onUnmounted(() => {
   closeWebSocket()
 })
 </script>
-
 
 
