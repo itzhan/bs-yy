@@ -81,9 +81,11 @@ Icon?
 **/cypress/screenshots/
 
 # ===== Logs =====
-**/logs/
-**/log/
+logs/
+log/
 **/*.log
+# 不要忽略源码中的 log 模块
+!**/src/**/log/
 
 # ===== Eclipse / STS =====
 **/.classpath
