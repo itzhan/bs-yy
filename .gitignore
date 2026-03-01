@@ -114,9 +114,6 @@ log/
 *.tar.gz
 *.tar
 
-# ===== Upload (runtime data) =====
-upload/
-
 # ===== Docker =====
 .env.docker
 

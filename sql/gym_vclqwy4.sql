@@ -1,3 +1,6 @@
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 -- gym_vclqwy4 数据库脚本
 
 CREATE DATABASE IF NOT EXISTS `gym_vclqwy4`

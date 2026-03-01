@@ -1,3 +1,6 @@
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 USE `gym_vclqwy4`;
 
 -- 第一批：分类表
