@@ -119,3 +119,6 @@ upload/
 
 # ===== Docker =====
 .env.docker
+
+# ===== Mac 启动脚本 =====
+start.sh
