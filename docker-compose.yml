@@ -22,7 +22,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./sql:/docker-entrypoint-initdb.d:ro
     command: >
-      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password --init-connect="SET NAMES utf8mb4"
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-ab123168}" ]
       interval: 10s
@@ -46,11 +46,12 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-gym_vclqwy4}?rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&allowMultiQueries=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ab123168}
+      UPLOAD_PATH: ./upload/
       TZ: Asia/Shanghai
     ports:
       - "${BACKEND_PORT:-8888}:8888"
     volumes:
-      - upload_data:/app/upload
+      - ./upload:/app/upload
     networks:
       - gym-network
 
@@ -88,8 +89,6 @@ services:
 
 volumes:
   mysql_data:
-    driver: local
-  upload_data:
     driver: local
 
 networks:
