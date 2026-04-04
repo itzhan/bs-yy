@@ -259,7 +259,11 @@ async function handleImageUpload(event: Event) {
 function initWebSocket(toId: number) {
   try { websock?.close() } catch (e) {}
   websock = null
-  const wsBase = (baseUrl || '').replace(/^http/, 'ws')
+  let absBase = baseUrl || ''
+  if (absBase && !absBase.startsWith('http') && !absBase.startsWith('ws') && typeof window !== 'undefined') {
+    absBase = window.location.origin + absBase
+  }
+  const wsBase = absBase.replace(/^http/i, 'ws')
   let url = wsBase.endsWith('/') ? wsBase : wsBase + '/'
   url += `ws?user_id=${myid.value}&to_id=${toId}`
   try {

@@ -31,8 +31,12 @@ function resolveBaseUrl() {
   } catch (e) {
     base = ''
   }
-  if (!base && typeof window !== 'undefined') {
-    base = window.location?.origin || ''
+  if (typeof window !== 'undefined') {
+    if (!base) {
+      base = window.location?.origin || ''
+    } else if (!base.startsWith('http') && !base.startsWith('ws')) {
+      base = (window.location?.origin || '') + base
+    }
   }
   return base
 }
