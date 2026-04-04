@@ -111,6 +111,14 @@
             <span class="label">创建时间：</span>
             <span class="value">{{ formatField(item.addtime) }}</span>
           </div>
+          <div class="info-item">
+            <span class="label">审核状态：</span>
+            <span class="value">
+              <el-tag :type="item.auditstatus === '已通过' ? 'success' : item.auditstatus === '已拒绝' ? 'danger' : 'warning'" size="small">
+                {{ item.auditstatus || '待审核' }}
+              </el-tag>
+            </span>
+          </div>
           <div class="stats" v-if="statsAvailable">
             <div v-if="showLike" class="stat"><span class="icon">👍</span>{{ statValue('like', item) }}</div>
             <div v-if="showFavorite" class="stat"><span class="icon">⭐</span>{{ statValue('favorite', item) }}</div>

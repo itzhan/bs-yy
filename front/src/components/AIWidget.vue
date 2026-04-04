@@ -119,9 +119,13 @@ function setAskType(val: number) {
   askType.value = val
   if (val === 2) {
     initWebSocket(1)
+    chatList.value.push({ role: 'system', content: '已切换到人工客服模式，请稍等管理员回复', type: 1 })
+    nextTick(() => scrollBottom())
   } else {
     try { websock?.close() } catch (e) {}
     websock = null
+    chatList.value.push({ role: 'system', content: '已切换到AI客服模式', type: 1 })
+    nextTick(() => scrollBottom())
   }
 }
 
@@ -257,7 +261,7 @@ function initWebSocket(toId: number) {
   websock = null
   const wsBase = (baseUrl || '').replace(/^http/, 'ws')
   let url = wsBase.endsWith('/') ? wsBase : wsBase + '/'
-  url += `ws?user_id=&to_id=`
+  url += `ws?user_id=${myid.value}&to_id=${toId}`
   try {
     websock = new WebSocket(url)
     websock.onmessage = () => loadHistory()

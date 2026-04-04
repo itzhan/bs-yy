@@ -41,8 +41,12 @@ import com.annotation.IgnoreAuth;
 
 import com.entity.RefundproductorderEntity;
 import com.entity.view.RefundproductorderView;
+import com.entity.ProductorderEntity;
+import com.entity.ProductEntity;
 
 import com.service.RefundproductorderService;
+import com.service.ProductorderService;
+import com.service.ProductService;
 import com.utils.PageUtils;
 import com.utils.R;
 import com.utils.MPUtil;
@@ -62,6 +66,10 @@ import com.log.OperationLogRecorder;
 public class RefundproductorderController {
     @Resource
     private RefundproductorderService refundproductorderService;
+    @Resource
+    private ProductorderService productorderService;
+    @Resource
+    private ProductService productService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
 
@@ -153,6 +161,7 @@ public class RefundproductorderController {
     public R save(@RequestBody RefundproductorderEntity refundproductorder, HttpServletRequest request){
         //ValidatorUtils.validateEntity(refundproductorder);
         refundproductorder.setId(null);
+        refundproductorder.setAuditstatus("待审核");
         if (refundproductorder!= null && refundproductorder.getUserid() == null) {
             refundproductorder.setUserid((Long)request.getSession().getAttribute("userId"));
         }
@@ -168,6 +177,7 @@ public class RefundproductorderController {
     public R add(@RequestBody RefundproductorderEntity refundproductorder, HttpServletRequest request){
         //ValidatorUtils.validateEntity(refundproductorder);
         refundproductorder.setId(null);
+        refundproductorder.setAuditstatus("待审核");
         if (refundproductorder!= null && refundproductorder.getUserid() == null) {
             refundproductorder.setUserid((Long)request.getSession().getAttribute("userId"));
         }
@@ -187,6 +197,48 @@ public class RefundproductorderController {
         //全部更新
         refundproductorderService.updateById(refundproductorder);
         operationLogRecorder.record("refundproductorder", "商品订单退款", "修改", refundproductorder, request);
+        return R.ok();
+    }
+
+    /**
+    * 退款审核
+    */
+    @RequestMapping("/audit")
+    @Transactional
+    public R audit(@RequestBody Map<String, Object> params, HttpServletRequest request){
+        Long id = Long.parseLong(params.get("id").toString());
+        String auditstatus = params.get("auditstatus").toString();
+        RefundproductorderEntity refund = refundproductorderService.getById(id);
+        if(refund == null) {
+            return R.error("退款记录不存在");
+        }
+        refund.setAuditstatus(auditstatus);
+        refundproductorderService.updateById(refund);
+        if("已通过".equals(auditstatus) && refund.getCrossrefid() != null) {
+            ProductorderEntity order = productorderService.getById(refund.getCrossrefid());
+            if(order != null) {
+                order.setOrderstatus("已退款");
+                productorderService.updateById(order);
+                // 恢复商品库存
+                if(refund.getProductname() != null) {
+                    QueryWrapper<ProductEntity> pw = new QueryWrapper<>();
+                    pw.eq("productname", refund.getProductname());
+                    ProductEntity product = productService.getOne(pw);
+                    if(product != null && product.getStock() != null && refund.getQuantity() != null) {
+                        product.setStock(product.getStock() + refund.getQuantity());
+                        productService.updateById(product);
+                    }
+                }
+            }
+        }
+        if("已拒绝".equals(auditstatus) && refund.getCrossrefid() != null) {
+            ProductorderEntity order = productorderService.getById(refund.getCrossrefid());
+            if(order != null) {
+                order.setOrderstatus("已支付");
+                productorderService.updateById(order);
+            }
+        }
+        operationLogRecorder.record("refundproductorder", "商品订单退款", "审核:" + auditstatus, refund, request);
         return R.ok();
     }
 

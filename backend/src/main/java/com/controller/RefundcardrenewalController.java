@@ -41,8 +41,10 @@ import com.annotation.IgnoreAuth;
 
 import com.entity.RefundcardrenewalEntity;
 import com.entity.view.RefundcardrenewalView;
+import com.entity.CardrenewalEntity;
 
 import com.service.RefundcardrenewalService;
+import com.service.CardrenewalService;
 import com.utils.PageUtils;
 import com.utils.R;
 import com.utils.MPUtil;
@@ -62,6 +64,8 @@ import com.log.OperationLogRecorder;
 public class RefundcardrenewalController {
     @Resource
     private RefundcardrenewalService refundcardrenewalService;
+    @Resource
+    private CardrenewalService cardrenewalService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
 
@@ -153,6 +157,7 @@ public class RefundcardrenewalController {
     public R save(@RequestBody RefundcardrenewalEntity refundcardrenewal, HttpServletRequest request){
         //ValidatorUtils.validateEntity(refundcardrenewal);
         refundcardrenewal.setId(null);
+        refundcardrenewal.setAuditstatus("待审核");
         if (refundcardrenewal!= null && refundcardrenewal.getUserid() == null) {
             refundcardrenewal.setUserid((Long)request.getSession().getAttribute("userId"));
         }
@@ -168,6 +173,7 @@ public class RefundcardrenewalController {
     public R add(@RequestBody RefundcardrenewalEntity refundcardrenewal, HttpServletRequest request){
         //ValidatorUtils.validateEntity(refundcardrenewal);
         refundcardrenewal.setId(null);
+        refundcardrenewal.setAuditstatus("待审核");
         if (refundcardrenewal!= null && refundcardrenewal.getUserid() == null) {
             refundcardrenewal.setUserid((Long)request.getSession().getAttribute("userId"));
         }
@@ -187,6 +193,38 @@ public class RefundcardrenewalController {
         //全部更新
         refundcardrenewalService.updateById(refundcardrenewal);
         operationLogRecorder.record("refundcardrenewal", "续卡记录退款", "修改", refundcardrenewal, request);
+        return R.ok();
+    }
+
+    /**
+    * 退款审核
+    */
+    @RequestMapping("/audit")
+    @Transactional
+    public R audit(@RequestBody Map<String, Object> params, HttpServletRequest request){
+        Long id = Long.parseLong(params.get("id").toString());
+        String auditstatus = params.get("auditstatus").toString();
+        RefundcardrenewalEntity refund = refundcardrenewalService.getById(id);
+        if(refund == null) {
+            return R.error("退款记录不存在");
+        }
+        refund.setAuditstatus(auditstatus);
+        refundcardrenewalService.updateById(refund);
+        if("已通过".equals(auditstatus) && refund.getCrossrefid() != null) {
+            CardrenewalEntity order = cardrenewalService.getById(refund.getCrossrefid());
+            if(order != null) {
+                order.setOrderstatus("已退款");
+                cardrenewalService.updateById(order);
+            }
+        }
+        if("已拒绝".equals(auditstatus) && refund.getCrossrefid() != null) {
+            CardrenewalEntity order = cardrenewalService.getById(refund.getCrossrefid());
+            if(order != null) {
+                order.setOrderstatus("已支付");
+                cardrenewalService.updateById(order);
+            }
+        }
+        operationLogRecorder.record("refundcardrenewal", "续卡记录退款", "审核:" + auditstatus, refund, request);
         return R.ok();
     }
 

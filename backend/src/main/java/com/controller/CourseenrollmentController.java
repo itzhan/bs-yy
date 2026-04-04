@@ -287,6 +287,7 @@ public class CourseenrollmentController {
     public R save(@RequestBody CourseenrollmentEntity courseenrollment, HttpServletRequest request){
         //ValidatorUtils.validateEntity(courseenrollment);
         courseenrollment.setId(null);
+        courseenrollment.setAuditstatus("待审核");
         if (courseenrollment!= null && courseenrollment.getUserid() == null) {
             courseenrollment.setUserid((Long)request.getSession().getAttribute("userId"));
         }
@@ -301,14 +302,11 @@ public class CourseenrollmentController {
             }
             nf_0.setUserid(nf_0_userId);
             nf_0.setTitle("课程报名已提交");
-            nf_0.setContent(String.format("您已提交报名课程《%s》，请完成支付，上课时间：%s", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
+            nf_0.setContent(String.format("您已提交报名课程《%s》，请等待教练审核，上课时间：%s", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
             nf_0.setMessagetype("报名通知");
             nf_0.setReadstatus("未读");
             nf_0.setSenduser("系统");
             notifyService.save(nf_0);
-        }
-        if ("已支付".equals(String.valueOf(courseenrollment.getIspay()))) {
-            ensureCoachMemberBinding(courseenrollment, request);
         }
         operationLogRecorder.record("courseenrollment", "课程报名记录", "新增", courseenrollment, request);
         return R.ok().put("data",courseenrollment.getId());
@@ -321,6 +319,7 @@ public class CourseenrollmentController {
     public R add(@RequestBody CourseenrollmentEntity courseenrollment, HttpServletRequest request){
         //ValidatorUtils.validateEntity(courseenrollment);
         courseenrollment.setId(null);
+        courseenrollment.setAuditstatus("待审核");
         if (courseenrollment!= null && courseenrollment.getUserid() == null) {
             courseenrollment.setUserid((Long)request.getSession().getAttribute("userId"));
         }
@@ -335,14 +334,11 @@ public class CourseenrollmentController {
             }
             nf_0.setUserid(nf_0_userId);
             nf_0.setTitle("课程报名已提交");
-            nf_0.setContent(String.format("您已提交报名课程《%s》，请完成支付，上课时间：%s", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
+            nf_0.setContent(String.format("您已提交报名课程《%s》，请等待教练审核，上课时间：%s", courseenrollment.getCoursename(), courseenrollment.getClasstime()));
             nf_0.setMessagetype("报名通知");
             nf_0.setReadstatus("未读");
             nf_0.setSenduser("系统");
             notifyService.save(nf_0);
-        }
-        if ("已支付".equals(String.valueOf(courseenrollment.getIspay()))) {
-            ensureCoachMemberBinding(courseenrollment, request);
         }
         operationLogRecorder.record("courseenrollment", "课程报名记录", "新增", courseenrollment, request);
         return R.ok().put("data",courseenrollment.getId());
@@ -400,6 +396,56 @@ public class CourseenrollmentController {
             }
         }
         operationLogRecorder.record("courseenrollment", "课程报名记录", "修改", courseenrollment, request);
+        return R.ok();
+    }
+
+    /**
+    * 报名审核（教练/管理员）
+    */
+    @RequestMapping("/audit")
+    @Transactional
+    public R audit(@RequestBody Map<String, Object> params, HttpServletRequest request){
+        Long id = Long.parseLong(params.get("id").toString());
+        String auditstatus = params.get("auditstatus").toString();
+        CourseenrollmentEntity enrollment = courseenrollmentService.getById(id);
+        if(enrollment == null) {
+            return R.error("报名记录不存在");
+        }
+        enrollment.setAuditstatus(auditstatus);
+        courseenrollmentService.updateById(enrollment);
+        // 审核通过：创建教练-学员绑定，发送通知
+        if("已通过".equals(auditstatus)) {
+            ensureCoachMemberBinding(enrollment, request);
+            NotifyEntity nf = new NotifyEntity();
+            nf.setUserid(enrollment.getUserid());
+            nf.setTitle("报名审核通过");
+            nf.setContent(String.format("您报名的课程《%s》已审核通过，请及时完成支付", enrollment.getCoursename()));
+            nf.setMessagetype("审核通知");
+            nf.setReadstatus("未读");
+            nf.setSenduser("系统");
+            notifyService.save(nf);
+        }
+        // 审核驳回：恢复课程名额，发送通知
+        if("已驳回".equals(auditstatus)) {
+            if(enrollment.getCoursename() != null) {
+                QueryWrapper<CourseEntity> cw = new QueryWrapper<>();
+                cw.eq("coursename", enrollment.getCoursename());
+                CourseEntity course = courseService.getOne(cw);
+                if(course != null && course.getQuota() != null) {
+                    course.setQuota(course.getQuota() + 1);
+                    courseService.updateById(course);
+                }
+            }
+            NotifyEntity nf = new NotifyEntity();
+            nf.setUserid(enrollment.getUserid());
+            nf.setTitle("报名审核未通过");
+            nf.setContent(String.format("您报名的课程《%s》审核未通过，课程名额已恢复", enrollment.getCoursename()));
+            nf.setMessagetype("审核通知");
+            nf.setReadstatus("未读");
+            nf.setSenduser("系统");
+            notifyService.save(nf);
+        }
+        operationLogRecorder.record("courseenrollment", "课程报名记录", "审核:" + auditstatus, enrollment, request);
         return R.ok();
     }
 

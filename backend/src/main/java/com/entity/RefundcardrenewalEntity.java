@@ -63,6 +63,11 @@ public class RefundcardrenewalEntity implements Serializable {
     @TableField(fill = FieldFill.INSERT)
     private Date addtime;
     /**
+     * 审核状态
+     */
+    @TableField(value = "`auditstatus`")
+    private String auditstatus;
+    /**
      * 跨表用户id
      */
     @TableField(value = "`crossuserid`")
@@ -72,6 +77,14 @@ public class RefundcardrenewalEntity implements Serializable {
      */
     @TableField(value = "`crossrefid`")
     private Long crossrefid;
+
+    public String getAuditstatus() {
+        return auditstatus;
+    }
+
+    public void setAuditstatus(String auditstatus) {
+        this.auditstatus = auditstatus;
+    }
 
     public Long getId() {
         return id;

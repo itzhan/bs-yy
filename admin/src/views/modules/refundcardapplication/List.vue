@@ -30,6 +30,21 @@
             @keydown.enter="search()"
             />
         </div>
+        <div class="inline-block mr-4">
+            <label class="inline-block mr-2 leading-10">审核状态</label>
+            <div>
+                <el-select
+                    v-model="searchForm.auditstatus"
+                    placeholder="请选择审核状态"
+                    clearable
+                    class="w-40"
+                >
+                    <el-option label="待审核" value="待审核" />
+                    <el-option label="已通过" value="已通过" />
+                    <el-option label="已拒绝" value="已拒绝" />
+                </el-select>
+            </div>
+        </div>
         <el-button type="primary" @click="search()">
           <el-icon><Search /></el-icon>
           搜索
@@ -123,6 +138,13 @@
         <el-table-column prop="validdays" label="有效期" />
         <el-table-column prop="includedcourses" label="包含课时" />
         <el-table-column prop="refundreason" label="退款原因" />
+        <el-table-column prop="auditstatus" label="审核状态" width="120">
+          <template #default="scope">
+            <el-tag :type="scope.row.auditstatus === '已通过' ? 'success' : scope.row.auditstatus === '已拒绝' ? 'danger' : 'warning'">
+              {{ scope.row.auditstatus || '待审核' }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <!-- 操作列 -->
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="scope">
@@ -157,6 +179,22 @@
                 @click="chatOpen(scope.row)"
             >
               私聊
+            </el-button>
+            <el-button
+                v-if="isAuth('refundcardapplication', '审核') && scope.row.auditstatus === '待审核'"
+                type="success"
+                size="small"
+                @click="auditHandler(scope.row.id, '已通过')"
+            >
+              通过
+            </el-button>
+            <el-button
+                v-if="isAuth('refundcardapplication', '审核') && scope.row.auditstatus === '待审核'"
+                type="danger"
+                size="small"
+                @click="auditHandler(scope.row.id, '已拒绝')"
+            >
+              拒绝
             </el-button>
           </template>
         </el-table-column>
@@ -507,6 +545,7 @@
   const searchForm = reactive({
     packagename: undefined,
     packagetype: undefined,
+    auditstatus: undefined,
   })
 
   // 图片预览
@@ -527,6 +566,9 @@
     }
     if (searchForm.packagetype) {
       params.packagetype = '%' + searchForm.packagetype + '%'
+    }
+    if (searchForm.auditstatus) {
+      params.auditstatus = searchForm.auditstatus
     }
     http.get('refundcardapplication/page', { params }).then((response: any) => {
       if (response && response.code === 0) {
@@ -556,6 +598,7 @@
   const reset = () => {
     searchForm.packagename = undefined
     searchForm.packagetype = undefined
+    searchForm.auditstatus = undefined
     pageIndex.value = 1
     getDataList()
   }
@@ -715,6 +758,23 @@
   }
 
 
+
+  // 审核处理
+  const auditHandler = async (id: number, auditstatus: string) => {
+    const actionText = auditstatus === '已通过' ? '通过' : '拒绝'
+    try {
+      await ElMessageBox.confirm(`确定要${actionText}该退款申请吗？`, '退款审核', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      await http.post('refundcardapplication/audit', { id, auditstatus })
+      ElMessage.success(`已${actionText}`)
+      getDataList()
+    } catch {
+      // 用户取消
+    }
+  }
 
   // 图片预览
   const imgPreView = (url: string) => {

@@ -17,7 +17,7 @@ services:
       MYSQL_COLLATION: utf8mb4_unicode_ci
       TZ: Asia/Shanghai
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      - "${MYSQL_PORT:-3307}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sql:/docker-entrypoint-initdb.d:ro
@@ -49,7 +49,7 @@ services:
       UPLOAD_PATH: ./upload/
       TZ: Asia/Shanghai
     ports:
-      - "${BACKEND_PORT:-8888}:8888"
+      - "${BACKEND_PORT:-8889}:8888"
     volumes:
       - ./upload:/app/upload
     networks:
@@ -67,7 +67,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${ADMIN_PORT:-3001}:80"
+      - "${ADMIN_PORT:-3011}:80"
     networks:
       - gym-network
 
@@ -83,7 +83,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${FRONT_PORT:-3002}:80"
+      - "${FRONT_PORT:-3012}:80"
     networks:
       - gym-network
 

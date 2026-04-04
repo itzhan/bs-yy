@@ -839,9 +839,9 @@ const crossButtonsConfig: CrossButtonConfig[] = [
   {
     name: '退款',
     targetTable: 'refundcardrenewal',
-    tips: '退款已处理',
+    tips: '退款申请已提交，请等待管理员审核',
     statusField: 'orderstatus',
-    statusValue: '已退款',
+    statusValue: '退款审核中',
     stockTargetTable: '',
     stockMode: '',
     stockField: '',

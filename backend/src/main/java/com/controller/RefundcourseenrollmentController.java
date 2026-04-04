@@ -41,8 +41,12 @@ import com.annotation.IgnoreAuth;
 
 import com.entity.RefundcourseenrollmentEntity;
 import com.entity.view.RefundcourseenrollmentView;
+import com.entity.CourseenrollmentEntity;
+import com.entity.CourseEntity;
 
 import com.service.RefundcourseenrollmentService;
+import com.service.CourseenrollmentService;
+import com.service.CourseService;
 import com.utils.PageUtils;
 import com.utils.R;
 import com.utils.MPUtil;
@@ -62,6 +66,10 @@ import com.log.OperationLogRecorder;
 public class RefundcourseenrollmentController {
     @Resource
     private RefundcourseenrollmentService refundcourseenrollmentService;
+    @Resource
+    private CourseenrollmentService courseenrollmentService;
+    @Resource
+    private CourseService courseService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
 
@@ -153,6 +161,7 @@ public class RefundcourseenrollmentController {
     public R save(@RequestBody RefundcourseenrollmentEntity refundcourseenrollment, HttpServletRequest request){
         //ValidatorUtils.validateEntity(refundcourseenrollment);
         refundcourseenrollment.setId(null);
+        refundcourseenrollment.setAuditstatus("待审核");
         if (refundcourseenrollment!= null && refundcourseenrollment.getUserid() == null) {
             refundcourseenrollment.setUserid((Long)request.getSession().getAttribute("userId"));
         }
@@ -168,6 +177,7 @@ public class RefundcourseenrollmentController {
     public R add(@RequestBody RefundcourseenrollmentEntity refundcourseenrollment, HttpServletRequest request){
         //ValidatorUtils.validateEntity(refundcourseenrollment);
         refundcourseenrollment.setId(null);
+        refundcourseenrollment.setAuditstatus("待审核");
         if (refundcourseenrollment!= null && refundcourseenrollment.getUserid() == null) {
             refundcourseenrollment.setUserid((Long)request.getSession().getAttribute("userId"));
         }
@@ -187,6 +197,50 @@ public class RefundcourseenrollmentController {
         //全部更新
         refundcourseenrollmentService.updateById(refundcourseenrollment);
         operationLogRecorder.record("refundcourseenrollment", "课程报名记录退款", "修改", refundcourseenrollment, request);
+        return R.ok();
+    }
+
+    /**
+    * 退款审核
+    */
+    @RequestMapping("/audit")
+    @Transactional
+    public R audit(@RequestBody Map<String, Object> params, HttpServletRequest request){
+        Long id = Long.parseLong(params.get("id").toString());
+        String auditstatus = params.get("auditstatus").toString();
+        RefundcourseenrollmentEntity refund = refundcourseenrollmentService.getById(id);
+        if(refund == null) {
+            return R.error("退款记录不存在");
+        }
+        refund.setAuditstatus(auditstatus);
+        refundcourseenrollmentService.updateById(refund);
+        // 审核通过时，更新原订单状态为"已退款"并恢复课程名额
+        if("已通过".equals(auditstatus) && refund.getCrossrefid() != null) {
+            CourseenrollmentEntity enrollment = courseenrollmentService.getById(refund.getCrossrefid());
+            if(enrollment != null) {
+                enrollment.setOrderstatus("已退款");
+                courseenrollmentService.updateById(enrollment);
+                // 恢复课程名额
+                if(enrollment.getCoursename() != null) {
+                    QueryWrapper<CourseEntity> cw = new QueryWrapper<>();
+                    cw.eq("coursename", enrollment.getCoursename());
+                    CourseEntity course = courseService.getOne(cw);
+                    if(course != null && course.getQuota() != null) {
+                        course.setQuota(course.getQuota() + 1);
+                        courseService.updateById(course);
+                    }
+                }
+            }
+        }
+        // 审核拒绝时，恢复原订单状态为"已支付"
+        if("已拒绝".equals(auditstatus) && refund.getCrossrefid() != null) {
+            CourseenrollmentEntity enrollment = courseenrollmentService.getById(refund.getCrossrefid());
+            if(enrollment != null) {
+                enrollment.setOrderstatus("已支付");
+                courseenrollmentService.updateById(enrollment);
+            }
+        }
+        operationLogRecorder.record("refundcourseenrollment", "课程报名记录退款", "审核:" + auditstatus, refund, request);
         return R.ok();
     }
 
