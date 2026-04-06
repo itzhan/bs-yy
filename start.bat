@@ -15,9 +15,9 @@ echo.
 echo ========================================
 echo   启动完成！
 echo.
-echo   后端 API:  http://localhost:8888/gym_vclqwy4
-echo   管理端:    http://localhost:3001
-echo   用户端:    http://localhost:3002
+echo   后端 API:  http://localhost:8889/gym_vclqwy4
+echo   管理端:    http://localhost:3011
+echo   用户端:    http://localhost:3012
 echo ========================================
 echo.
 pause
