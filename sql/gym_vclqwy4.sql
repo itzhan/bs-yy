@@ -118,6 +118,7 @@ CREATE TABLE `courseenrollment` (
   `ispay` varchar(500) COMMENT '是否支付',
   `orderstatus` varchar(500) COMMENT '状态',
   `logistics` varchar(500) COMMENT '物流信息',
+  `auditstatus` varchar(20) DEFAULT '待审核' COMMENT '审核状态',
   `crossuserid` bigint(20) DEFAULT 0 COMMENT '跨表用户id',
   `crossrefid` bigint(20) DEFAULT 0 COMMENT '跨表来源id',
 PRIMARY KEY (`id`)
