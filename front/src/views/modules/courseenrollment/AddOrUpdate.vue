@@ -46,7 +46,7 @@
         type="datetime"
         value-format="YYYY-MM-DD HH:mm:ss"
         placeholder="请选择上课时间"
-        :disabled="read.classtime || isCross"
+        disabled
         clearable
       />
     </el-form-item>
@@ -379,10 +379,28 @@ watch(() => [
   }
 }, { immediate: true })
 
+// Bug7: 选择课程后自动填充上课时间等字段
+const courseListCache = ref<any[]>([])
+
+watch(() => (form as any).coursename, (newVal: string) => {
+  if (!newVal || isCross.value) return
+  const course = courseListCache.value.find((c: any) => c.coursename === newVal)
+  if (course) {
+    ;(form as any).classtime = course.classtime
+    ;(form as any).courseimage = course.courseimage
+    ;(form as any).coursetype = course.coursetype
+    ;(form as any).duration = course.duration
+    ;(form as any).coachname = course.coachname
+    ;(form as any).coachaccount = course.coachaccount
+    ;(form as any).courseprice = course.courseprice
+  }
+})
+
 async function loadCategoryOptions() {
   try {
     const res: any = await http.get('course/list', { params: { page: 1, limit: 1000, sort: 'id', order: 'asc' } })
     const list = Array.isArray(res?.data?.list) ? res.data.list : Array.isArray(res?.data?.data?.list) ? res.data.data.list : []
+    courseListCache.value = list
     categoryOptions['coursename'] = list
       .map((item: any) => item?.['coursename'])
       .filter(Boolean)

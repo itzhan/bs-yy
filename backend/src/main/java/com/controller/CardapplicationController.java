@@ -51,6 +51,8 @@ import java.io.IOException;
 import com.service.NotifyService;
 import com.entity.NotifyEntity;
 import com.log.OperationLogRecorder;
+import com.service.UserService;
+import com.entity.UserEntity;
 
 /**
 * 办卡记录
@@ -68,6 +70,8 @@ public class CardapplicationController {
     private NotifyService notifyService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
+    @Resource
+    private UserService userService;
 
     /**
     * 后台列表
@@ -236,6 +240,48 @@ public class CardapplicationController {
             nf_1.setReadstatus("未读");
             nf_1.setSenduser("系统");
             notifyService.save(nf_1);
+            }
+        }
+        // Bug2: 支付扣款 + Bug3: 更新会员信息
+        if ("已支付".equals(String.valueOf(cardapplication.getIspay()))) {
+            Long payUserId = cardapplication.getUserid();
+            if (payUserId == null) {
+                payUserId = (Long) request.getSession().getAttribute("userId");
+            }
+            if (payUserId != null) {
+                UserEntity payUser = userService.getById(payUserId);
+                if (payUser != null) {
+                    // 扣除余额
+                    double price = cardapplication.getPackageprice() != null ? cardapplication.getPackageprice() : 0;
+                    double currentMoney = payUser.getMoney() != null ? payUser.getMoney() : 0;
+                    payUser.setMoney(currentMoney - price);
+                    // 更新会员到期时间
+                    Integer validdays = cardapplication.getValiddays();
+                    if (validdays != null && validdays > 0) {
+                        Calendar cal = Calendar.getInstance();
+                        Date currentExpire = payUser.getExpiretime();
+                        if (currentExpire != null && currentExpire.after(new Date())) {
+                            cal.setTime(currentExpire);
+                        }
+                        cal.add(Calendar.DAY_OF_YEAR, validdays);
+                        payUser.setExpiretime(cal.getTime());
+                    }
+                    // 增加剩余课时
+                    Integer includedCourses = cardapplication.getIncludedcourses();
+                    if (includedCourses != null && includedCourses > 0) {
+                        int current = payUser.getRemainingcourses() != null ? payUser.getRemainingcourses() : 0;
+                        payUser.setRemainingcourses(current + includedCourses);
+                    }
+                    // 设置会员等级
+                    if (!StrUtil.isBlank(cardapplication.getPackagetype())) {
+                        payUser.setMemberlevel(cardapplication.getPackagetype());
+                    }
+                    // 生成会员卡号
+                    if (StrUtil.isBlank(payUser.getCardno())) {
+                        payUser.setCardno("GYM" + IdUtil.simpleUUID().substring(0, 8).toUpperCase());
+                    }
+                    userService.updateById(payUser);
+                }
             }
         }
         operationLogRecorder.record("cardapplication", "办卡记录", "修改", cardapplication, request);

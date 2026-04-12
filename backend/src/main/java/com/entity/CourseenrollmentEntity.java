@@ -124,6 +124,14 @@ public class CourseenrollmentEntity implements Serializable {
      */
     @TableField(value = "`crossrefid`")
     private Long crossrefid;
+    /**
+     * 支付方式
+     */
+    @TableField(value = "`paymentmethod`")
+    private String paymentmethod;
+
+    public String getPaymentmethod() { return paymentmethod; }
+    public void setPaymentmethod(String paymentmethod) { this.paymentmethod = paymentmethod; }
 
     public String getAuditstatus() {
         return auditstatus;

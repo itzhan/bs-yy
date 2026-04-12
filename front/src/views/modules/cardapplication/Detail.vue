@@ -451,15 +451,34 @@ const payType = ref('')
 const payAmountField = 'packageprice'
 const payQuantityField = 'quantity'
 const payTotalFieldName = 'packageprice'
-const payOptions = [
-  { value: 'balance', label: '余额支付', img: '' },
-  { value: 'weixin', label: '微信支付', img: weixinImg },
-  { value: 'zhifubao', label: '支付宝支付', img: zhifubaoImg },
-  { value: 'jianshe', label: '建设银行', img: jiansheImg },
-  { value: 'jiaotong', label: '交通银行', img: jiaotongImg },
-  { value: 'nongye', label: '农业银行', img: nongyeImg },
-  { value: 'zhongguo', label: '中国银行', img: zhongguoImg }
-]
+const payOptions = ref<any[]>([])
+// Bug6: 从后端动态加载支付方式
+async function loadPayOptions() {
+  try {
+    const res: any = await http.get('paymentsetting/list', { params: { enabled: '是', page: 1, limit: 100, sort: 'sortorder', order: 'asc' } })
+    const list = res?.data?.list || []
+    const imgMap: Record<string, string> = { weixin: weixinImg, zhifubao: zhifubaoImg, jianshe: jiansheImg, jiaotong: jiaotongImg, nongye: nongyeImg, zhongguo: zhongguoImg }
+    payOptions.value = list.map((item: any) => ({
+      value: item.paycode || item.payname,
+      label: item.payname,
+      img: item.payicon ? (item.payicon.startsWith('http') ? item.payicon : (baseUrl + item.payicon)) : (imgMap[item.paycode] || '')
+    }))
+    if (!payOptions.value.length) {
+      payOptions.value = [
+        { value: 'balance', label: '余额支付', img: '' },
+        { value: 'weixin', label: '微信支付', img: weixinImg },
+        { value: 'zhifubao', label: '支付宝支付', img: zhifubaoImg }
+      ]
+    }
+  } catch (e) {
+    payOptions.value = [
+      { value: 'balance', label: '余额支付', img: '' },
+      { value: 'weixin', label: '微信支付', img: weixinImg },
+      { value: 'zhifubao', label: '支付宝支付', img: zhifubaoImg }
+    ]
+  }
+}
+loadPayOptions()
 const userRoleTable = (localStorage.getItem('frontSessionTable') || localStorage.getItem('UserTableName') || '').replace(/"/g, '').trim()
 const userInfo = reactive<Record<string, any>>({})
 const balanceField = ref('money')
@@ -735,7 +754,7 @@ async function submitPay() {
     if (!deductOk) {
       return
     }
-    const payload = { ...info, ispay: '已支付' }
+    const payload = { ...info, ispay: '已支付', paymentmethod: payType.value }
     if ('orderstatus' in payload) {
       payload.orderstatus = '已支付'
     } else {

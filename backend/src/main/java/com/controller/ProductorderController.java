@@ -51,6 +51,8 @@ import java.io.IOException;
 import com.service.NotifyService;
 import com.entity.NotifyEntity;
 import com.log.OperationLogRecorder;
+import com.service.UserService;
+import com.entity.UserEntity;
 
 /**
 * 商品订单
@@ -68,6 +70,8 @@ public class ProductorderController {
     private NotifyService notifyService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
+    @Resource
+    private UserService userService;
 
     /**
     * 后台列表
@@ -236,6 +240,20 @@ public class ProductorderController {
             nf_1.setReadstatus("未读");
             nf_1.setSenduser("系统");
             notifyService.save(nf_1);
+            // Bug2: 商品订单支付扣款
+            Long payUserId = productorder.getUserid();
+            if (payUserId == null) {
+                payUserId = (Long) request.getSession().getAttribute("userId");
+            }
+            if (payUserId != null) {
+                UserEntity payUser = userService.getById(payUserId);
+                if (payUser != null) {
+                    double price = productorder.getTotalprice() != null ? productorder.getTotalprice() : 0;
+                    double currentMoney = payUser.getMoney() != null ? payUser.getMoney() : 0;
+                    payUser.setMoney(currentMoney - price);
+                    userService.updateById(payUser);
+                }
+            }
             }
         }
         {

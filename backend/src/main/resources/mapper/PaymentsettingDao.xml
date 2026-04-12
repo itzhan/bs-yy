@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.PaymentsettingDao">
+
+    <resultMap type="com.entity.PaymentsettingEntity" id="paymentsettingMap">
+        <result property="id" column="id"/>
+        <result property="payname" column="payname"/>
+        <result property="paycode" column="paycode"/>
+        <result property="payicon" column="payicon"/>
+        <result property="enabled" column="enabled"/>
+        <result property="sortorder" column="sortorder"/>
+        <result property="addtime" column="addtime"/>
+    </resultMap>
+
+    <select id="selectListVO" resultType="com.entity.vo.PaymentsettingVO">
+        SELECT * FROM paymentsetting paymentsetting ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectVO" resultType="com.entity.vo.PaymentsettingVO">
+        SELECT paymentsetting.* FROM paymentsetting paymentsetting ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListView" resultType="com.entity.view.PaymentsettingView">
+        SELECT paymentsetting.* FROM paymentsetting paymentsetting ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectView" resultType="com.entity.view.PaymentsettingView">
+        SELECT * FROM paymentsetting paymentsetting ${ew.customSqlSegment}
+    </select>
+
+</mapper>

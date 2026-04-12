@@ -97,6 +97,11 @@ public class CardapplicationEntity implements Serializable {
      */
     @TableField(value = "`crossrefid`")
     private Long crossrefid;
+    @TableField(value = "`paymentmethod`")
+    private String paymentmethod;
+
+    public String getPaymentmethod() { return paymentmethod; }
+    public void setPaymentmethod(String paymentmethod) { this.paymentmethod = paymentmethod; }
 
     public Long getId() {
         return id;

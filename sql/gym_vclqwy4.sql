@@ -119,6 +119,7 @@ CREATE TABLE `courseenrollment` (
   `orderstatus` varchar(500) COMMENT '状态',
   `logistics` varchar(500) COMMENT '物流信息',
   `auditstatus` varchar(20) DEFAULT '待审核' COMMENT '审核状态',
+  `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式',
   `crossuserid` bigint(20) DEFAULT 0 COMMENT '跨表用户id',
   `crossrefid` bigint(20) DEFAULT 0 COMMENT '跨表来源id',
 PRIMARY KEY (`id`)
@@ -187,6 +188,7 @@ CREATE TABLE `productorder` (
   `logistics` varchar(500) COMMENT '物流信息',
   `discussnum` int(11) DEFAULT 0 COMMENT '评论数',
   `userid` bigint(20) DEFAULT 0 COMMENT '用户ID',
+  `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式',
   `crossuserid` bigint(20) DEFAULT 0 COMMENT '跨表用户id',
   `crossrefid` bigint(20) DEFAULT 0 COMMENT '跨表来源id',
 PRIMARY KEY (`id`)
@@ -239,6 +241,7 @@ CREATE TABLE `cardapplication` (
   `ispay` varchar(500) COMMENT '是否支付',
   `orderstatus` varchar(500) COMMENT '状态',
   `logistics` varchar(500) COMMENT '物流信息',
+  `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式',
   `crossuserid` bigint(20) DEFAULT 0 COMMENT '跨表用户id',
   `crossrefid` bigint(20) DEFAULT 0 COMMENT '跨表来源id',
 PRIMARY KEY (`id`)
@@ -257,6 +260,7 @@ CREATE TABLE `cardrenewal` (
   `orderstatus` varchar(500) COMMENT '状态',
   `logistics` varchar(500) COMMENT '物流信息',
   `userid` bigint(20) DEFAULT 0 COMMENT '用户ID',
+  `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式',
   `crossuserid` bigint(20) DEFAULT 0 COMMENT '跨表用户id',
   `crossrefid` bigint(20) DEFAULT 0 COMMENT '跨表来源id',
 PRIMARY KEY (`id`)

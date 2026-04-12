@@ -130,6 +130,12 @@
             </div>
           </template>
         </el-table-column>
+        <el-table-column prop="_userExpiretime" label="会员到期时间" width="170">
+          <template #default="scope">
+            <span v-if="scope.row._userExpiretime">{{ scope.row._userExpiretime }}</span>
+            <span v-else class="text-gray-400">-</span>
+          </template>
+        </el-table-column>
         <!-- 操作列 -->
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="scope">
@@ -292,7 +298,7 @@
 </template>
 
 <script setup lang="ts">
-  import {  ref, reactive, onMounted , nextTick, watch, computed } from 'vue'
+  import {  ref, reactive, onMounted, onActivated, nextTick, watch, computed } from 'vue'
   import { http } from '@/utils/request'
   import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
   import { isAuth } from '@/utils/auth'
@@ -377,7 +383,7 @@
   const chatContentRef = ref<HTMLElement>()
   const uploadUrl = (baseUrl.endsWith('/') ? baseUrl : baseUrl + '/') + 'file/upload'
   const authStore = useAuthStore()
-  const myid = computed(() => String(authStore.userInfo?.id || localStorage.getItem('userid') || ''))
+  const myid = computed(() => { const rawId = Number(authStore.userInfo?.id || localStorage.getItem('userid') || 0); const role = authStore.userInfo?.role || localStorage.getItem('sessionTable') || ''; return String(role === 'coach' ? rawId + 100000 : rawId) })
   const chatVisible = ref(false)
   const chatTitle = ref('')
   const nowfid = ref<number | null>(null)
@@ -600,11 +606,25 @@
     if (searchForm.orderstatus) {
       params.orderstatus = '%' + searchForm.orderstatus + '%'
     }
-    http.get('cardrenewal/page', { params }).then((response: any) => {
+    http.get('cardrenewal/page', { params }).then(async (response: any) => {
       if (response && response.code === 0) {
-        dataList.value = response.data.list || []
-        // 确保 total 传入分页组件为数字类型，避免字符串导致分页不显示
+        const list = response.data.list || []
+        dataList.value = list
         totalPage.value = Number(response.data.total ?? 0)
+        // 批量获取用户到期时间
+        const userIds = [...new Set(list.map((r: any) => r.userid).filter(Boolean))]
+        for (const uid of userIds) {
+          try {
+            const res: any = await http.get(`user/info/${uid}`)
+            if (res?.code === 0 && res?.data) {
+              const expiretime = res.data.expiretime
+              list.forEach((row: any) => {
+                if (row.userid === uid) row._userExpiretime = expiretime || null
+              })
+            }
+          } catch {}
+        }
+        dataList.value = [...list]
       } else {
         dataList.value = []
         totalPage.value = 0
@@ -1045,6 +1065,11 @@
   // 组件挂载时获取数据
   onMounted(() => {
     getPackagenameOptions()
+    getDataList()
+  })
+
+  // 从支付页返回时自动刷新
+  onActivated(() => {
     getDataList()
   })
 </script>

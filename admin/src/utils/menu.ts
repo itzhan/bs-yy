@@ -438,6 +438,18 @@ export const menuConfig = [
                     ]
                 }
                 ,
+                {
+                    "menu": "消息中心",
+                    "child": [
+                        {
+                            "menu": "消息工作台",
+                            "tableName": "chatworkbench",
+                            "allButtons": ["查看"],
+                            "buttons": ["查看"]
+                        }
+                    ]
+                }
+                ,
             ]
 }
 ,
@@ -774,6 +786,16 @@ export const menuConfig = [
         {
             "menu": "系统管理",
             "child": [
+                {
+                    "menu": "支付设置",
+                    "tableName": "paymentsetting",
+                    "allButtons": [
+                        "新增","查看","修改","删除"
+                    ],
+                    "buttons": [
+                        "新增","查看","修改","删除"
+                    ]
+                },
                 {
                     "menu": "客服工作台",
                     "tableName": "chatworkbench",

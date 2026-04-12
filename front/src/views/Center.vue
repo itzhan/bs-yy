@@ -1613,10 +1613,18 @@ async function fillPeerProfile(peer: ChatPeer) {
   const hasName = peer.displayName && peer.displayName !== defaultName
   if (hasName && peer.avatar) return
 
+  // Bug5: 教练ID偏移量处理
+  const isCoachPeer = peer.id >= 100000
+  const realId = isCoachPeer ? peer.id - 100000 : peer.id
+  if (isCoachPeer && !peer.tablename) {
+    peer.tablename = 'coach'
+  }
+
   const tryFill = async (role: { name: string; usernameField?: string; avatarField?: string }) => {
     try {
       if (!role) return false
-      const detail: any = await http.get(role.name + '/detail/' + peer.id)
+      const queryId = role.name === 'coach' ? realId : peer.id
+      const detail: any = await http.get(role.name + '/detail/' + queryId)
       const data = detail?.data
       if (!data) return false
       if (!peer.displayName) {

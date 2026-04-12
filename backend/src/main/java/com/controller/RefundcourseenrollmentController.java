@@ -53,6 +53,8 @@ import com.utils.MPUtil;
 import com.utils.MapUtils;
 import java.io.IOException;
 import com.log.OperationLogRecorder;
+import com.service.UserService;
+import com.entity.UserEntity;
 
 /**
 * 课程报名记录退款
@@ -72,6 +74,8 @@ public class RefundcourseenrollmentController {
     private CourseService courseService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
+    @Resource
+    private UserService userService;
 
     /**
     * 后台列表
@@ -228,6 +232,17 @@ public class RefundcourseenrollmentController {
                     if(course != null && course.getQuota() != null) {
                         course.setQuota(course.getQuota() + 1);
                         courseService.updateById(course);
+                    }
+                }
+                // Bug2: 退款增加余额
+                Long refundUserId = enrollment.getUserid();
+                Double refundAmount = enrollment.getTotalprice();
+                if (refundUserId != null && refundAmount != null) {
+                    UserEntity refundUser = userService.getById(refundUserId);
+                    if (refundUser != null) {
+                        double current = refundUser.getMoney() != null ? refundUser.getMoney() : 0;
+                        refundUser.setMoney(current + refundAmount);
+                        userService.updateById(refundUser);
                     }
                 }
             }

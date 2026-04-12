@@ -136,7 +136,7 @@
           </div>
           <div class="info-item">
             <span class="label">课程单价：</span>
-            <span class="value">{{ formatField(item.courseprice) }}</span>
+            <span class="value">{{ Number(item.courseprice) === 0 ? '免费' : formatField(item.courseprice) }}</span>
           </div>
           <div class="info-item">
             <span class="label">剩余名额：</span>

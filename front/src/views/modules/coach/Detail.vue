@@ -435,7 +435,7 @@ async function chatClick(){
   const q: any = await http.get(`${chatRoleTable}/query`, { params: { [`${chatAccountField}`]: chatAccountVal.value } as any })
   const u = q?.data
   if (!u || !u.id) { return }
-  fid.value = u.id
+  fid.value = Number(u.id) + 100000  // 与管理端教练侧 myid=coachId+100000 保持一致
   fname.value = u[chatAccountField] || ''
   if (chatAvatarField && u[chatAvatarField]) {
     const v = String(u[chatAvatarField]).split(',')[0]

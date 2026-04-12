@@ -53,6 +53,8 @@ import com.utils.MPUtil;
 import com.utils.MapUtils;
 import java.io.IOException;
 import com.log.OperationLogRecorder;
+import com.service.UserService;
+import com.entity.UserEntity;
 
 /**
 * 商品订单退款
@@ -72,6 +74,8 @@ public class RefundproductorderController {
     private ProductService productService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
+    @Resource
+    private UserService userService;
 
     /**
     * 后台列表
@@ -227,6 +231,16 @@ public class RefundproductorderController {
                     if(product != null && product.getStock() != null && refund.getQuantity() != null) {
                         product.setStock(product.getStock() + refund.getQuantity());
                         productService.updateById(product);
+                    }
+                }
+                // Bug2: 退款增加余额
+                Long refundUserId = order.getUserid();
+                if (refundUserId != null && order.getTotalprice() != null) {
+                    UserEntity refundUser = userService.getById(refundUserId);
+                    if (refundUser != null) {
+                        double current = refundUser.getMoney() != null ? refundUser.getMoney() : 0;
+                        refundUser.setMoney(current + order.getTotalprice());
+                        userService.updateById(refundUser);
                     }
                 }
             }

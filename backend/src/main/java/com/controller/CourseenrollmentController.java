@@ -185,11 +185,17 @@ public class CourseenrollmentController {
                     .setScale(2, RoundingMode.HALF_UP);
             courseenrollment.setTotalprice(total.doubleValue());
         }
-        if (StrUtil.isBlank(courseenrollment.getIspay())) {
-            courseenrollment.setIspay("未支付");
-        }
-        if (StrUtil.isBlank(courseenrollment.getOrderstatus())) {
-            courseenrollment.setOrderstatus("未支付");
+        // Bug1: 免费课程自动完成支付
+        if (courseenrollment.getTotalprice() != null && courseenrollment.getTotalprice() == 0) {
+            courseenrollment.setIspay("已支付");
+            courseenrollment.setOrderstatus("已支付");
+        } else {
+            if (StrUtil.isBlank(courseenrollment.getIspay())) {
+                courseenrollment.setIspay("未支付");
+            }
+            if (StrUtil.isBlank(courseenrollment.getOrderstatus())) {
+                courseenrollment.setOrderstatus("未支付");
+            }
         }
     }
 
@@ -375,6 +381,20 @@ public class CourseenrollmentController {
         }
         if ("已支付".equals(String.valueOf(courseenrollment.getIspay()))) {
             ensureCoachMemberBinding(courseenrollment, request);
+            // Bug2: 课程报名支付扣款
+            Long payUserId = courseenrollment.getUserid();
+            if (payUserId == null) {
+                payUserId = (Long) request.getSession().getAttribute("userId");
+            }
+            if (payUserId != null) {
+                UserEntity payUser = userService.getById(payUserId);
+                if (payUser != null) {
+                    double price = courseenrollment.getTotalprice() != null ? courseenrollment.getTotalprice() : 0;
+                    double currentMoney = payUser.getMoney() != null ? payUser.getMoney() : 0;
+                    payUser.setMoney(currentMoney - price);
+                    userService.updateById(payUser);
+                }
+            }
         }
         {
             boolean _send = true;

@@ -59,7 +59,7 @@
             </div>
             <div class="info-item">
               <span class="label">课程单价：</span>
-              <span class="text">{{ info.courseprice }}</span>
+              <span class="text">{{ Number(info.courseprice) === 0 ? '免费' : info.courseprice }}</span>
             </div>
             <div class="info-item">
               <span class="label">剩余名额：</span>
@@ -1450,7 +1450,8 @@ async function chatClick(){
   const q: any = await http.get(`${chatRoleTable}/query`, { params: { [`${chatAccountField}`]: chatAccountVal.value } as any })
   const u = q?.data
   if (!u || !u.id) { return }
-  fid.value = u.id
+  // Bug5: 教练ID加偏移量，与管理端教练发消息保持一致
+  fid.value = chatRoleTable === 'coach' ? u.id + 100000 : u.id
   fname.value = u[chatAccountField] || ''
   if (chatAvatarField && u[chatAvatarField]) {
     const v = String(u[chatAvatarField]).split(',')[0]

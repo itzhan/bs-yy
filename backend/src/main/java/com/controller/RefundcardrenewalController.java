@@ -51,6 +51,8 @@ import com.utils.MPUtil;
 import com.utils.MapUtils;
 import java.io.IOException;
 import com.log.OperationLogRecorder;
+import com.service.UserService;
+import com.entity.UserEntity;
 
 /**
 * 续卡记录退款
@@ -68,6 +70,8 @@ public class RefundcardrenewalController {
     private CardrenewalService cardrenewalService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
+    @Resource
+    private UserService userService;
 
     /**
     * 后台列表
@@ -215,6 +219,17 @@ public class RefundcardrenewalController {
             if(order != null) {
                 order.setOrderstatus("已退款");
                 cardrenewalService.updateById(order);
+                // Bug2: 退款增加余额
+                Long refundUserId = order.getUserid();
+                Double refundAmount = order.getPackageprice();
+                if (refundUserId != null && refundAmount != null) {
+                    UserEntity refundUser = userService.getById(refundUserId);
+                    if (refundUser != null) {
+                        double current = refundUser.getMoney() != null ? refundUser.getMoney() : 0;
+                        refundUser.setMoney(current + refundAmount);
+                        userService.updateById(refundUser);
+                    }
+                }
             }
         }
         if("已拒绝".equals(auditstatus) && refund.getCrossrefid() != null) {

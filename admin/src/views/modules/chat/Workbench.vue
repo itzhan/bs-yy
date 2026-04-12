@@ -65,7 +65,11 @@ import { useAuthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
 
 const auth = useAuthStore()
-const adminId = ref<number>(Number(auth.userInfo?.id || localStorage.getItem('userid') || 0))
+const role = auth.userInfo?.role || localStorage.getItem('sessionTable') || ''
+const isCoach = role === 'coach'
+const rawId = Number(auth.userInfo?.id || localStorage.getItem('userid') || 0)
+const adminId = isCoach ? rawId + 100000 : rawId
+
 const tickets = ref<any[]>([])
 const keyword = ref('')
 const filterUnread = ref(false)
@@ -83,33 +87,139 @@ let websock: WebSocket | null = null
 
 function scrollBottom(){ nextTick(()=>{ try{ const el = (scrollRef.value as any)?.wrapRef as HTMLElement; if(el){ el.scrollTop = el.scrollHeight } }catch{} }) }
 
-async function loadTickets(){
+// ---- 教练模式：读 chatmessage 表 ----
+async function loadTicketsCoach(){
+  // 取所有发给本教练的消息 (fid=adminId)
+  const res:any = await http.get('chatmessage/page', { params: { fid: adminId, page:1, limit:500, sort:'id', order:'desc' } })
+  const arr = res?.data?.list || []
+  // 按 uid 去重，取最新一条
+  const map:Record<string, any> = {}
+  for(const it of arr){
+    const key = String(it.uid)
+    if(!map[key]) map[key] = it
+  }
+  let list = Object.values(map).map((it:any) => ({
+    userid: it.uid,        // 发消息用户的 uid
+    uname: it.uid,         // 先用 uid 占位，下面异步获取用户名
+    preview: it.content,
+    isread: it.isread,
+    isreply: 1,            // chatmessage 无 isreply 概念
+    addtime: it.addtime,
+  }))
+  // 关键字过滤（此时还没加载到用户名，暂用 uid 过滤）
+  if(keyword.value?.trim()){
+    const kw = keyword.value.trim()
+    list = list.filter(row => String(row.uname).includes(kw) || String(row.userid).includes(kw))
+  }
+  if(filterUnread.value) list = list.filter(row => Number(row.isread) === 0)
+  tickets.value = list
+  // 异步补充用户名
+  for(const item of list){
+    try{
+      const ur:any = await http.get(`user/info/${item.userid}`)
+      if(ur?.code === 0 && ur?.data){
+        item.uname = ur.data.name || ur.data.useraccount || item.userid
+        tickets.value = [...tickets.value]
+      }
+    }catch{}
+  }
+}
+
+async function loadConversationCoach(refreshTickets = false){
+  if(!currentUser.value) return
+  const res:any = await http.get('chatmessage/mlist', { params: { uid: adminId, fid: currentUser.value.userid, page:1, limit:500, sort:'id', order:'asc' } })
+  const arr = res?.data?.list || []
+  messages.value = arr.map((row:any) => ({
+    side: Number(row.uid) === adminId ? 'right' : 'left',
+    type: isImageMsg(row.content) ? 2 : 1,
+    content: row.content,
+  }))
+  scrollBottom()
+  if(refreshTickets) await loadTicketsCoach()
+}
+
+async function sendReplyCoach(){
+  if(!replyText.value.trim()) return
+  if(!currentUser.value){ ElMessage.warning('请先选择会话'); return }
+  await http.post('chatmessage/add', { uid: adminId, fid: currentUser.value.userid, content: replyText.value, format: 1, tablename: 'coach' })
+  try{ websock?.send(replyText.value) }catch{}
+  replyText.value = ''
+  await loadConversationCoach(true)
+  scrollBottom()
+}
+
+async function sendReplyUploadCoach(path:string){
+  if(!currentUser.value){ ElMessage.warning('请先选择会话'); return }
+  await http.post('chatmessage/add', { uid: adminId, fid: currentUser.value.userid, content: path, format: 2, tablename: 'coach' })
+  try{ websock?.send('[图片]') }catch{}
+  await loadConversationCoach(true); scrollBottom()
+}
+
+// ---- 管理员模式：读 chat 表（原逻辑）----
+async function loadTicketsAdmin(){
   const params:any = { page:1, limit:200, sort:'addtime', order:'desc' }
-  // 接口前缀改为使用富化后的表名，避免硬编码
   const res:any = await http.get('chat/page', { params })
   const arr = res?.data?.list || []
   const map:Record<string, any> = {}
   const latest:any[] = []
   for(const it of arr){
     const key = String(it.userid || '0')
-    if(!map[key]){
-      map[key] = it
-      latest.push(it)
-    }
+    if(!map[key]){ map[key] = it; latest.push(it) }
   }
   let list = latest
   if(keyword.value?.trim()){
     const kw = keyword.value.trim()
-    list = list.filter(row => String(row.uname || (`用户`)).includes(kw))
+    list = list.filter(row => String(row.uname || '').includes(kw))
   }
-  if(filterUnread.value){
-    list = list.filter(row => Number(row.isread) === 0)
-  }
-  if(filterUnreply.value){
-    list = list.filter(row => Number(row.isreply) === 0)
-  }
+  if(filterUnread.value) list = list.filter(row => Number(row.isread) === 0)
+  if(filterUnreply.value) list = list.filter(row => Number(row.isreply) === 0)
   tickets.value = list
 }
+
+async function loadConversationAdmin(refreshTickets = false){
+  if(!currentUser.value) return
+  const res:any = await http.get('chat/page', { params: { userid: currentUser.value.userid, page:1, limit:200, sort:'id', order:'asc' } })
+  const arr = res?.data?.list || []
+  const msgs:any[] = []
+  const unreadIds:number[] = []
+  for(const row of arr){
+    if(row.ask) msgs.push({ side: 'left', type: isImageMsg(row.ask)?2:1, content: row.ask })
+    if(row.reply) msgs.push({ side: 'right', type: isImageMsg(row.reply)?2:1, content: row.reply })
+    if(Number(row.isread)===0 && row.ask && row.id) unreadIds.push(row.id)
+  }
+  messages.value = msgs
+  scrollBottom()
+  if(unreadIds.length){
+    try{ await Promise.all(unreadIds.map(id => http.post('chat/update', { id, isread:1 }))) }catch{}
+    if(currentUser.value) currentUser.value.isread = 1
+  }
+  if(refreshTickets) await loadTicketsAdmin()
+}
+
+async function sendReplyAdmin(){
+  if(!replyText.value.trim()) return
+  if(!currentUser.value){ ElMessage.warning('请先选择会话'); return }
+  const res:any = await http.get('chat/page', { params: { userid: currentUser.value.userid, isreply:0, page:1, limit:1, sort:'id', order:'desc' } })
+  const last = res?.data?.list?.[0]
+  if(!last){ ElMessage.warning('没有可回复的提问'); return }
+  await http.post('chat/update', { id: last.id, reply: replyText.value, replytype:1, uname: currentUser.value.uname, adminid: adminId, isreply:1, isread:1 })
+  try{ websock?.send(replyText.value) }catch{}
+  replyText.value = ''
+  await loadConversationAdmin(true)
+}
+
+async function sendReplyUploadAdmin(path:string){
+  if(!currentUser.value){ ElMessage.warning('请先选择会话'); return }
+  await http.post('chat/add', { userid: currentUser.value.userid, uname: currentUser.value.uname, reply: path, replytype:2, isreply:1, isread:1, adminid: adminId })
+  try{ websock?.send('[图片]') }catch{}
+  await loadConversationAdmin(true); scrollBottom()
+}
+
+// ---- 统一入口 ----
+async function loadTickets(){ isCoach ? loadTicketsCoach() : loadTicketsAdmin() }
+async function loadConversation(refreshTickets = false){ isCoach ? loadConversationCoach(refreshTickets) : loadConversationAdmin(refreshTickets) }
+async function sendReply(){ isCoach ? sendReplyCoach() : sendReplyAdmin() }
+function uploadSuccessImg(res:any){ if(res?.code===0){ isCoach ? sendReplyUploadCoach(res.file) : sendReplyUploadAdmin(res.file) } }
 
 async function openSession(it:any){
   currentUser.value = it
@@ -117,84 +227,18 @@ async function openSession(it:any){
   initWS()
 }
 
-async function loadConversation(refreshTickets = false){
-  if(!currentUser.value) return
-  const res:any = await http.get('chat/page', { params: { userid: currentUser.value.userid, page:1, limit:200, sort:'id', order:'asc' } })
-  const arr = res?.data?.list || []
-  const msgs:any[] = []
-  const unreadIds:number[] = []
-  for(const row of arr){
-    const askTypeRaw = Number(row.asktype ?? 0)
-    const askMsgType = askTypeRaw > 0 ? askTypeRaw : (isImageMsg(row.ask) ? 2 : 1)
-    if(row.ask){
-      msgs.push({ side: 'left', type: askMsgType === 2 ? 2 : 1, content: row.ask })
-    }
-    if(row.reply){
-      const replyTypeRaw = Number(row.replytype ?? 0)
-      const replyMsgType = replyTypeRaw > 0 ? replyTypeRaw : (isImageMsg(row.reply) ? 2 : 1)
-      msgs.push({ side: 'right', type: replyMsgType === 2 ? 2 : 1, content: row.reply })
-    }
-    if(Number(row.isread) === 0 && row.ask && row.id){
-      unreadIds.push(row.id)
-    }
-  }
-  messages.value = msgs
-  scrollBottom()
-  if(unreadIds.length){
-    try{
-      await Promise.all(unreadIds.map(id => http.post('chat/update', { id, isread:1 })))
-      if(currentUser.value){ currentUser.value.isread = 1 }
-    }catch(e){
-      console.warn('mark read failed', e)
-    }
-  }
-  if(refreshTickets){
-    await loadTickets()
-  }
-}
-
-async function sendReply(){
-  if(!replyText.value.trim()) return
-  if(!currentUser.value){ ElMessage.warning('请先选择会话'); return }
-  // 找到该用户最新一条未回复记录
-  const res:any = await http.get('chat/page', { params: { userid: currentUser.value.userid, isreply:0, page:1, limit:1, sort:'id', order:'desc' } })
-  const last = res?.data?.list?.[0]
-  if(!last){ ElMessage.warning('没有可回复的提问'); return }
-  await http.post('chat/update', { id: last.id, reply: replyText.value, replytype: 1, uname: currentUser.value.uname, adminid: adminId.value, isreply:1, isread:1 })
-  // 推送WS通知
-  try{ websock?.send(replyText.value) }catch{}
-  replyText.value = ''
-  await loadConversation(true)
-}
-
 function initWS(){
   try{ websock?.close() }catch{}
   websock = null
   const wsBase = (baseUrl||'').replace(/^http/, 'ws')
   let url = wsBase.endsWith('/')?wsBase:(wsBase+'/')
-  url += `ws?user_id=${adminId.value}&to_id=${currentUser.value?.userid}`
+  url += `ws?user_id=${adminId}&to_id=${currentUser.value?.userid}`
   websock = new WebSocket(url)
-  websock.onmessage = ()=>{ loadConversation(true) }
+  websock.onmessage = ()=>{ loadConversation(false) }
 }
 
 function fullUrl(p:string){ if(!p) return ''; return p.startsWith('http')? p : (baseUrl + p) }
-
-function isImageMsg(content:any){
-  if(!content || typeof content !== 'string') return false
-  if(content.startsWith('upload/')) return true
-  return /\.(png|jpe?g|gif|bmp|webp)(\?.*)?$/i.test(content)
-}
-
-// 上传回复（仅图片）
-async function sendReplyUpload(path:string){
-  if(!currentUser.value){ ElMessage.warning('请先选择会话'); return }
-  const payload:any = { userid: currentUser.value.userid, uname: currentUser.value.uname, reply: `${path}`, replytype: 2, isreply:1, isread:1, adminid: adminId.value }
-  await http.post('chat/add', payload)
-  try{ websock?.send('[图片]') }catch{}
-  await loadConversation(true); scrollBottom()
-}
-
-function uploadSuccessImg(res:any){ if(res?.code===0) sendReplyUpload(res.file) }
+function isImageMsg(content:any){ if(!content || typeof content !== 'string') return false; if(content.startsWith('upload/')) return true; return /\.(png|jpe?g|gif|bmp|webp)(\?.*)?$/i.test(content) }
 
 onMounted(()=>{
   loadTickets()

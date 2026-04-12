@@ -311,6 +311,13 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/modules/notify/List.vue'),
         meta: { title: '消息通知管理' }
       },
+      // 支付设置管理
+      {
+        path: 'modules/paymentsetting',
+        name: 'Paymentsetting',
+        component: () => import('@/views/modules/paymentsetting/List.vue'),
+        meta: { title: '支付设置' }
+      },
       // 支付页面（固定）
       {
         path: 'pay',

@@ -51,6 +51,8 @@ import java.io.IOException;
 import com.service.NotifyService;
 import com.entity.NotifyEntity;
 import com.log.OperationLogRecorder;
+import com.service.UserService;
+import com.entity.UserEntity;
 
 /**
 * 续卡记录
@@ -68,6 +70,8 @@ public class CardrenewalController {
     private NotifyService notifyService;
     @Resource
     private OperationLogRecorder operationLogRecorder;
+    @Resource
+    private UserService userService;
 
     /**
     * 后台列表
@@ -236,6 +240,34 @@ public class CardrenewalController {
             nf_1.setReadstatus("未读");
             nf_1.setSenduser("系统");
             notifyService.save(nf_1);
+            }
+        }
+        // Bug2: 续卡扣款 + Bug3: 延长会员到期时间
+        if ("已支付".equals(String.valueOf(cardrenewal.getIspay()))) {
+            Long payUserId = cardrenewal.getUserid();
+            if (payUserId == null) {
+                payUserId = (Long) request.getSession().getAttribute("userId");
+            }
+            if (payUserId != null) {
+                UserEntity payUser = userService.getById(payUserId);
+                if (payUser != null) {
+                    // 扣除余额
+                    double price = cardrenewal.getPackageprice() != null ? cardrenewal.getPackageprice() : 0;
+                    double currentMoney = payUser.getMoney() != null ? payUser.getMoney() : 0;
+                    payUser.setMoney(currentMoney - price);
+                    // 延长会员到期时间
+                    Integer renewalDays = cardrenewal.getRenewaldays();
+                    if (renewalDays != null && renewalDays > 0) {
+                        Calendar cal = Calendar.getInstance();
+                        Date currentExpire = payUser.getExpiretime();
+                        if (currentExpire != null && currentExpire.after(new Date())) {
+                            cal.setTime(currentExpire);
+                        }
+                        cal.add(Calendar.DAY_OF_YEAR, renewalDays);
+                        payUser.setExpiretime(cal.getTime());
+                    }
+                    userService.updateById(payUser);
+                }
             }
         }
         operationLogRecorder.record("cardrenewal", "续卡记录", "修改", cardrenewal, request);
