@@ -41,13 +41,13 @@
                 />
             </el-select>
         </el-form-item>
-        <el-form-item v-if="type === 'info' || false || read.classtime" label="上课时间" prop="classtime">
+        <el-form-item v-if="type === 'info' || true || read.classtime" label="上课时间" prop="classtime">
             <el-date-picker
                 value-format="YYYY-MM-DD HH:mm:ss"
                 v-model="form.classtime"
                 type="datetime"
                 placeholder="请选择上课时间"
-                :readonly="type === 'info' || read.classtime"
+                :readonly="type === 'info'"
             />
         </el-form-item>
         <el-form-item v-if="type === 'info' || false || read.duration" label="课程时长" prop="duration">
@@ -558,7 +558,7 @@
         (form as any).crossuserid = Number(currentUserId as any)
       }
       if (crossObj && crossObj.id !== undefined && crossObj.id !== null) {
-        (form as any).crossrefid = Number(crossObj.id as any)
+        (form as any).crossrefid = crossObj.id
       }
       // 若配置了数量字段，默认本次数量为1（可按需修改）
       if (amountFieldName && (form as any)[amountFieldName] === undefined) {

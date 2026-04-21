@@ -67,8 +67,8 @@ import { ElMessage } from 'element-plus'
 const auth = useAuthStore()
 const role = auth.userInfo?.role || localStorage.getItem('sessionTable') || ''
 const isCoach = role === 'coach'
-const rawId = Number(auth.userInfo?.id || localStorage.getItem('userid') || 0)
-const adminId = isCoach ? rawId + 100000 : rawId
+const rawIdStr = String(auth.userInfo?.id || localStorage.getItem('userid') || '0')
+const adminId = isCoach ? String(BigInt(rawIdStr) + 100000n) : rawIdStr
 
 const tickets = ref<any[]>([])
 const keyword = ref('')
@@ -130,7 +130,7 @@ async function loadConversationCoach(refreshTickets = false){
   const res:any = await http.get('chatmessage/mlist', { params: { uid: adminId, fid: currentUser.value.userid, page:1, limit:500, sort:'id', order:'asc' } })
   const arr = res?.data?.list || []
   messages.value = arr.map((row:any) => ({
-    side: Number(row.uid) === adminId ? 'right' : 'left',
+    side: String(row.uid) === adminId ? 'right' : 'left',
     type: isImageMsg(row.content) ? 2 : 1,
     content: row.content,
   }))
@@ -181,7 +181,7 @@ async function loadConversationAdmin(refreshTickets = false){
   const res:any = await http.get('chat/page', { params: { userid: currentUser.value.userid, page:1, limit:200, sort:'id', order:'asc' } })
   const arr = res?.data?.list || []
   const msgs:any[] = []
-  const unreadIds:number[] = []
+  const unreadIds:any[] = []
   for(const row of arr){
     if(row.ask) msgs.push({ side: 'left', type: isImageMsg(row.ask)?2:1, content: row.ask })
     if(row.reply) msgs.push({ side: 'right', type: isImageMsg(row.reply)?2:1, content: row.reply })

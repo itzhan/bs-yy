@@ -348,7 +348,7 @@
   const chatContentRef = ref<HTMLElement>()
   const uploadUrl = (baseUrl.endsWith('/') ? baseUrl : baseUrl + '/') + 'file/upload'
   const authStore = useAuthStore()
-  const myid = computed(() => { const rawId = Number(authStore.userInfo?.id || localStorage.getItem('userid') || 0); const role = authStore.userInfo?.role || localStorage.getItem('sessionTable') || ''; return String(role === 'coach' ? rawId + 100000 : rawId) })
+  const myid = computed(() => { const rawIdStr = String(authStore.userInfo?.id || localStorage.getItem('userid') || '0'); const role = authStore.userInfo?.role || localStorage.getItem('sessionTable') || ''; return role === 'coach' ? String(BigInt(rawIdStr) + 100000n) : rawIdStr })
   const chatVisible = ref(false)
   const chatTitle = ref('')
   const nowfid = ref<number | null>(null)

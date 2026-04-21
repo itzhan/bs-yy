@@ -30,7 +30,7 @@
             />
         </el-form-item>
         <el-form-item v-if="type === 'info' || true || read.coursetype" label="课程分类" prop="coursetype">
-            <el-select v-model="form.coursetype" placeholder="请选择课程分类" :readonly="type === 'info' || read.coursetype">
+            <el-select v-model="form.coursetype" placeholder="请选择课程分类" :readonly="type === 'info' || read.coursetype" :disabled="form.courseprice === 0">
                 <el-option
                     v-for="(item, index) in coursetypeOptions"
                     :key="index"
@@ -243,6 +243,14 @@
       }
     }, { immediate: true })
   }
+
+  watch(() => form.courseprice, (newPrice) => {
+    if (newPrice !== undefined && newPrice !== null && Number(newPrice) === 0) {
+      form.coursetype = '免费团课'
+    } else if (form.coursetype === '免费团课') {
+      form.coursetype = ''
+    }
+  })
 
   const prefillMerchantInfo = async (force = false) => {
     if (!isCoupon || !hasMerchantMapping) return
@@ -516,7 +524,7 @@
         (form as any).crossuserid = Number(currentUserId as any)
       }
       if (crossObj && crossObj.id !== undefined && crossObj.id !== null) {
-        (form as any).crossrefid = Number(crossObj.id as any)
+        (form as any).crossrefid = crossObj.id
       }
       // 若配置了数量字段，默认本次数量为1（可按需修改）
       if (amountFieldName && (form as any)[amountFieldName] === undefined) {

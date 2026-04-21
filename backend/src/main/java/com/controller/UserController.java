@@ -188,6 +188,9 @@ public class UserController {
     @RequestMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
         UserEntity user = userService.getById(id);
+        if(user == null) {
+            return R.error(404, "用户不存在");
+        }
         Map<String, String> deSens = new HashMap<>();
         DeSensUtil.desensitize(user,deSens);
         return R.ok().put("data", user);
@@ -200,6 +203,9 @@ public class UserController {
     @RequestMapping("/detail/{id}")
     public R detail(@PathVariable("id") Long id){
         UserEntity user = userService.getById(id);
+        if(user == null) {
+            return R.error(404, "用户不存在");
+        }
         Map<String, String> deSens = new HashMap<>();
         DeSensUtil.desensitize(user,deSens);
         return R.ok().put("data", user);

@@ -46,7 +46,7 @@
         type="datetime"
         value-format="YYYY-MM-DD HH:mm:ss"
         placeholder="请选择上课时间"
-        disabled
+        :disabled-date="disabledPastDate"
         clearable
       />
     </el-form-item>
@@ -311,7 +311,7 @@ const rules = reactive<FormRules>({
       { required: false, message: '请输入课程分类', trigger: 'blur' }
     ],
     'classtime': [
-      { required: false, message: '请输入上课时间', trigger: 'blur' }
+      { required: true, message: '请选择上课时间', trigger: 'change' }
     ],
     'duration': [
       { required: false, message: '请输入课程时长', trigger: 'blur' }
@@ -386,7 +386,6 @@ watch(() => (form as any).coursename, (newVal: string) => {
   if (!newVal || isCross.value) return
   const course = courseListCache.value.find((c: any) => c.coursename === newVal)
   if (course) {
-    ;(form as any).classtime = course.classtime
     ;(form as any).courseimage = course.courseimage
     ;(form as any).coursetype = course.coursetype
     ;(form as any).duration = course.duration
@@ -395,6 +394,12 @@ watch(() => (form as any).coursename, (newVal: string) => {
     ;(form as any).courseprice = course.courseprice
   }
 })
+
+function disabledPastDate(date: Date) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return date.getTime() < today.getTime()
+}
 
 async function loadCategoryOptions() {
   try {
@@ -454,6 +459,11 @@ function applyCrossPrefill() {
         }
         return
       }
+      // 上课时间必须由用户自选，不从课程详情回填
+      if (key === 'classtime') {
+        (form as any)[key] = ''
+        return
+      }
       const value = crossObj[key]
       if (value !== undefined && value !== null) {
         (form as any)[key] = value
@@ -464,6 +474,10 @@ function applyCrossPrefill() {
         }
       }
     })
+    // 允许用户自选上课时间
+    if (Object.prototype.hasOwnProperty.call(read, 'classtime')) {
+      read['classtime'] = false
+    }
     if (pointRecordConfig.enabled) {
       const userField = (pointRecordConfig.recordUserField || '').trim()
       if (userField && Object.prototype.hasOwnProperty.call(form, userField)) {

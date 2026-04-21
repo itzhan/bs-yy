@@ -427,7 +427,7 @@
         (form as any).crossuserid = Number(currentUserId as any)
       }
       if (crossObj && crossObj.id !== undefined && crossObj.id !== null) {
-        (form as any).crossrefid = Number(crossObj.id as any)
+        (form as any).crossrefid = crossObj.id
       }
       // 若配置了数量字段，默认本次数量为1（可按需修改）
       if (amountFieldName && (form as any)[amountFieldName] === undefined) {

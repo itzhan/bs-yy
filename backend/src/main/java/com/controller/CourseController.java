@@ -217,6 +217,11 @@ public class CourseController {
         if ("管理员".equals(String.valueOf(request.getSession().getAttribute("role")))) {
             course.setAuditstatus("通过");
         }
+        if (course.getCourseprice() != null && course.getCourseprice() == 0) {
+            course.setCoursetype("免费团课");
+        } else if ("免费团课".equals(course.getCoursetype())) {
+            course.setCoursetype(null);
+        }
         courseService.save(course);
         operationLogRecorder.record("course", "健身课程", "新增", course, request);
         return R.ok().put("data",course.getId());
@@ -229,6 +234,11 @@ public class CourseController {
     public R add(@RequestBody CourseEntity course, HttpServletRequest request){
         //ValidatorUtils.validateEntity(course);
         course.setId(null);
+        if (course.getCourseprice() != null && course.getCourseprice() == 0) {
+            course.setCoursetype("免费团课");
+        } else if ("免费团课".equals(course.getCoursetype())) {
+            course.setCoursetype(null);
+        }
         courseService.save(course);
         operationLogRecorder.record("course", "健身课程", "新增", course, request);
         return R.ok().put("data",course.getId());
@@ -242,6 +252,11 @@ public class CourseController {
     @Transactional
     public R update(@RequestBody CourseEntity course, HttpServletRequest request){
         //ValidatorUtils.validateEntity(course);
+        if (course.getCourseprice() != null && course.getCourseprice() == 0) {
+            course.setCoursetype("免费团课");
+        } else if (course.getCourseprice() != null && "免费团课".equals(course.getCoursetype())) {
+            course.setCoursetype(null);
+        }
         //全部更新
         courseService.updateById(course);
         operationLogRecorder.record("course", "健身课程", "修改", course, request);

@@ -21,7 +21,7 @@ INSERT INTO `paymentsetting` (`payname`, `paycode`, `payicon`, `enabled`, `sorto
   ('中国银行', 'zhongguo', '', '是', 6);
 
 -- 订单表添加支付方式字段
-ALTER TABLE `courseenrollment` ADD COLUMN IF NOT EXISTS `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式';
-ALTER TABLE `cardapplication` ADD COLUMN IF NOT EXISTS `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式';
-ALTER TABLE `cardrenewal` ADD COLUMN IF NOT EXISTS `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式';
-ALTER TABLE `productorder` ADD COLUMN IF NOT EXISTS `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式';
+ALTER TABLE `courseenrollment` ADD COLUMN `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式';
+ALTER TABLE `cardapplication` ADD COLUMN `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式';
+ALTER TABLE `cardrenewal` ADD COLUMN `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式';
+ALTER TABLE `productorder` ADD COLUMN `paymentmethod` varchar(50) DEFAULT NULL COMMENT '支付方式';

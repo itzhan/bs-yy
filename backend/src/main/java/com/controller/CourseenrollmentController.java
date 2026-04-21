@@ -167,7 +167,9 @@ public class CourseenrollmentController {
             courseenrollment.setCoursename(course.getCoursename());
             courseenrollment.setCourseimage(course.getCourseimage());
             courseenrollment.setCoursetype(course.getCoursetype());
-            courseenrollment.setClasstime(course.getClasstime());
+            if (courseenrollment.getClasstime() == null) {
+                courseenrollment.setClasstime(course.getClasstime());
+            }
             courseenrollment.setDuration(course.getDuration());
             courseenrollment.setCoachname(course.getCoachname());
             courseenrollment.setCoachaccount(course.getCoachaccount());
@@ -185,7 +187,10 @@ public class CourseenrollmentController {
                     .setScale(2, RoundingMode.HALF_UP);
             courseenrollment.setTotalprice(total.doubleValue());
         }
-        // Bug1: 免费课程自动完成支付
+        if (courseenrollment.getCourseprice() != null && courseenrollment.getCourseprice() == 0) {
+            courseenrollment.setCoursetype("免费团课");
+        }
+        // 免费课程自动完成支付
         if (courseenrollment.getTotalprice() != null && courseenrollment.getTotalprice() == 0) {
             courseenrollment.setIspay("已支付");
             courseenrollment.setOrderstatus("已支付");
